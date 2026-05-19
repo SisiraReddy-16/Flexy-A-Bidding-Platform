@@ -1,0 +1,14 @@
+Flask
+gunicorn
+python-dotenv
+Flask-Cors
+Flask-Limiter
+requests
+PyJWT
+bcrypt
+Flask-SocketIO
+eventlet
+httpx==0.27.2
+pyotp
+qrcode[pil]
+flask-compress

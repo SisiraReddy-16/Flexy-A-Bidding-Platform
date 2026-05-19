@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <title>Flexy | Complete Your Order</title>
+  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/wallet.css" />
+  <style>
+    .order-page-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 6rem;
+    }
+    .order-page-title {
+      font-family: var(--font-headline);
+      font-size: 2rem;
+      font-weight: 900;
+      margin: 0 0 .25rem;
+      color: var(--on-surface);
+    }
+    .order-page-sub {
+      color: var(--on-surface-variant);
+      font-size: .9rem;
+      margin: 0 0 2.5rem;
+    }
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 720px) {
+      .order-grid { grid-template-columns: 1fr; }
+    }
+    .o-card {
+      background: var(--surface-container);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+    }
+    .o-card-title {
+      font-family: var(--font-headline);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--on-surface);
+      margin: 0 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .item-row {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .item-row img {
+      width: 80px;
+      height: 80px;
+      border-radius: .75rem;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--surface-container-high);
+    }
+    .item-row h4 {
+      font-family: var(--font-headline);
+      font-size: .95rem;
+      font-weight: 700;
+      margin: 0 0 .25rem;
+      color: var(--on-surface);
+      line-height: 1.4;
+    }
+    .item-row .winning-label {
+      font-size: .75rem;
+      color: var(--on-surface-variant);
+      margin: 0 0 .15rem;
+    }
+    .item-row .winning-amount {
+      font-family: var(--font-headline);
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 0;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .875rem;
+      color: var(--on-surface-variant);
+      padding: .4rem 0;
+    }
+    .price-row.total {
+      font-family: var(--font-headline);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--on-surface);
+      border-top: 1px dashed rgba(255,255,255,.1);
+      margin-top: .5rem;
+      padding-top: .75rem;
+    }
+    /* Payment methods */
+    .pay-opts {
+      display: flex;
+      flex-direction: column;
+      gap: .75rem;
+    }
+    .pay-opt {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface);
+      border: 2px solid rgba(255,255,255,.07);
+      border-radius: 1rem;
+      padding: .875rem 1.125rem;
+      cursor: pointer;
+      transition: border-color .2s, background .15s;
+      user-select: none;
+    }
+    .pay-opt:hover { border-color: var(--primary-dim); }
+    .pay-opt.selected {
+      border-color: var(--primary);
+      background: rgba(200,153,255,.08);
+    }
+    .pay-opt input[type=radio] {
+      accent-color: var(--primary);
+      width: 1.1rem; height: 1.1rem;
+      flex-shrink: 0;
+    }
+    .pay-opt-icon { font-size: 1.75rem; line-height: 1; }
+    .pay-opt-label h4 {
+      font-family: var(--font-headline);
+      font-size: .95rem;
+      font-weight: 700;
+      margin: 0 0 .1rem;
+      color: var(--on-surface);
+    }
+    .pay-opt-label p {
+      font-size: .78rem;
+      color: var(--on-surface-variant);
+      margin: 0;
+    }
+    .rzp-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      background: rgba(39,119,238,.15);
+      border: 1px solid rgba(39,119,238,.3);
+      border-radius: .4rem;
+      padding: .15rem .5rem;
+      font-size: .7rem;
+      color: #5b9cf6;
+      font-weight: 600;
+      margin-top: .25rem;
+    }
+    /* Address form */
+    .fg { margin-bottom: 1.1rem; }
+    .fg label {
+      display: block;
+      font-size: .78rem;
+      color: var(--on-surface-variant);
+      margin-bottom: .35rem;
+      font-weight: 500;
+    }
+    .fg input, .fg textarea, .fg select {
+      width: 100%;
+      box-sizing: border-box;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: .75rem;
+      padding: .75rem 1rem;
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: .875rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .fg input:focus, .fg textarea:focus, .fg select:focus {
+      border-color: var(--primary);
+    }
+    .fg select option { background: #1a1a1a; color: #fff; }
+    .fg textarea { resize: vertical; min-height: 72px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .875rem;
+    }
+    @media (max-width: 480px) { .two-col { grid-template-columns: 1fr; } }
+    /* Alert */
+    .o-alert {
+      display: none;
+      padding: .75rem 1rem;
+      border-radius: .625rem;
+      font-size: .85rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+    .o-alert.err { background: rgba(255,110,132,.12); color: #ff6e84; border: 1px solid rgba(255,110,132,.3); }
+    .o-alert.ok  { background: rgba(0,200,100,.1);    color: #00c864; border: 1px solid rgba(0,200,100,.3); }
+    /* Submit button */
+    .btn-order {
+      width: 100%;
+      padding: 1rem;
+      margin-top: 1.25rem;
+      background: linear-gradient(135deg, var(--primary), #9c3dff);
+      color: #fff;
+      border: none;
+      border-radius: 1rem;
+      font-family: var(--font-headline);
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      letter-spacing: .01em;
+    }
+    .btn-order:hover  { opacity: .9; }
+    .btn-order:active { transform: scale(.98); }
+    .btn-order:disabled { opacity: .45; cursor: not-allowed; }
+    /* Success */
+    .success-wrap {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .success-wrap .s-icon { font-size: 5rem; line-height: 1; margin-bottom: 1rem; }
+    .success-wrap h2 {
+      font-family: var(--font-headline);
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin: 0 0 .5rem;
+    }
+    .success-wrap p { color: var(--on-surface-variant); margin: 0 0 2rem; }
+    .success-wrap .order-chip {
+      display: inline-block;
+      background: rgba(200,153,255,.1);
+      border: 1px solid rgba(200,153,255,.3);
+      border-radius: .5rem;
+      padding: .4rem 1rem;
+      font-size: .8rem;
+      color: var(--primary);
+      margin-bottom: 2rem;
+    }
+    .btn-back {
+      display: inline-block;
+      background: var(--primary);
+      color: #1a0040;
+      padding: .875rem 2.5rem;
+      border-radius: 1rem;
+      font-family: var(--font-headline);
+      font-weight: 800;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    /* Loading / Error states */
+    .state-wrap {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--on-surface-variant);
+    }
+    .state-wrap .s-icon { font-size: 3rem; margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ══ Top Nav ══ -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div style="display:flex;align-items:center;gap:3rem;">
+        <a href="/dashboard" class="brand-logo">Flexy</a>
+        <div class="top-nav-links">
+          <a href="/dashboard">Explore</a>
+          <a href="/auction">Live</a>
+          <a href="/wallet">Wallet</a>
+        </div>
+      </div>
+      <div class="top-nav-right">
+        <button class="nav-icon-btn" onclick="window.location.href='/notifications'">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="nav-icon-btn" onclick="window.location.href='/wallet'">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </button>
+        <div class="nav-avatar" id="navAvatarWrap" onclick="window.location.href='/wallet'" style="cursor:pointer;">
+          <img id="navAvatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ Side Nav ══ -->
+  <aside class="side-nav">
+    <div class="side-nav-brand" style="padding-top:5rem;">
+      <h2>Flexy Beta</h2>
+      <p>High-Velocity Bidding</p>
+    </div>
+    <nav class="side-nav-links">
+      <a href="/dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/auction">
+        <span class="material-symbols-outlined">bolt</span>
+        <span>Live Auctions</span>
+      </a>
+      <a href="/watchlist">
+        <span class="material-symbols-outlined">favorite</span>
+        <span>Wishlist</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span>Wallet</span>
+      </a>
+    </nav>
+    <div class="side-nav-bottom">
+      <nav class="side-nav-links">
+        <a href="/settings"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+        <a href="#" id="logoutLink"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ══ Main Content ══ -->
+  <main class="main-with-sidebar">
+    <div class="order-page-wrap">
+
+      <!-- Loading -->
+      <div id="stateLoading" class="state-wrap">
+        <div class="s-icon">⏳</div>
+        <p>Loading your order…</p>
+      </div>
+
+      <!-- Error -->
+      <div id="stateError" class="state-wrap" style="display:none;">
+        <div class="s-icon">❌</div>
+        <p id="errorMsg" style="color:#ff6e84;">Something went wrong.</p>
+        <a href="/dashboard" style="color:var(--primary);text-decoration:none;font-weight:600;">← Back to Dashboard</a>
+      </div>
+
+      <!-- Success -->
+      <div id="stateSuccess" class="success-wrap">
+        <div class="s-icon">🏆</div>
+        <h2>Order Confirmed!</h2>
+        <p>Your order is placed. We'll send you a confirmation email with delivery details.</p>
+        <div class="order-chip" id="successOrderId">Order ID: —</div><br/>
+        <a href="/dashboard" class="btn-back">← Back to Dashboard</a>
+      </div>
+
+      <!-- Order Form -->
+      <div id="stateForm" style="display:none;">
+        <h1 class="order-page-title">🏆 Complete Your Order</h1>
+        <p class="order-page-sub">Congratulations! You won this auction. Fill in the details below to claim your item.</p>
+
+        <div class="order-grid">
+
+          <!-- Left column: item summary + payment -->
+          <div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+            <!-- Item summary -->
+            <div class="o-card">
+              <h3 class="o-card-title">
+                <span class="material-symbols-outlined" style="color:var(--primary);">inventory_2</span>
+                Item Won
+              </h3>
+              <div class="item-row">
+                <img id="itemImg" src="" alt="Item" />
+                <div>
+                  <h4 id="itemTitle">Loading…</h4>
+                  <p class="winning-label">Your Winning Bid</p>
+                  <p class="winning-amount" id="itemAmount">₹—</p>
+                </div>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:1rem;">
+                <div class="price-row"><span>Item Amount</span><span id="priceItem">₹—</span></div>
+                <div class="price-row"><span>Platform Fee</span><span>₹0</span></div>
+                <div class="price-row"><span>Shipping</span><span id="priceShipping">₹0</span></div>
+                <div class="price-row total"><span>Total Payable</span><span id="priceTotal">₹—</span></div>
+              </div>
+            </div>
+
+            <!-- Payment method -->
+            <div class="o-card">
+              <h3 class="o-card-title">
+                <span class="material-symbols-outlined" style="color:var(--primary);">payments</span>
+                Payment Method
+              </h3>
+              <div class="pay-opts">
+
+                <label class="pay-opt selected" for="payWallet">
+                  <input type="radio" id="payWallet" name="payMethod" value="wallet" checked />
+                  <div class="pay-opt-icon">👛</div>
+                  <div class="pay-opt-label">
+                    <h4>Flexy Wallet</h4>
+                    <p>Pay instantly from your Flexy balance</p>
+                    <p>Available: <strong id="walletBal" style="color:var(--primary);">₹—</strong></p>
+                  </div>
+                </label>
+
+                <label class="pay-opt" for="payRazorpay">
+                  <input type="radio" id="payRazorpay" name="payMethod" value="razorpay" />
+                  <div class="pay-opt-icon">💳</div>
+                  <div class="pay-opt-label">
+                    <h4>Online Payment</h4>
+                    <p>UPI, Cards, Net Banking via Razorpay</p>
+                    <span class="rzp-chip">🔒 Razorpay Secure</span>
+                  </div>
+                </label>
+
+                <label class="pay-opt" for="payCOD">
+                  <input type="radio" id="payCOD" name="payMethod" value="cod" />
+                  <div class="pay-opt-icon">📦</div>
+                  <div class="pay-opt-label">
+                    <h4>Cash on Delivery</h4>
+                    <p>Pay in cash when the item arrives at your door</p>
+                  </div>
+                </label>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right column: delivery address -->
+          <div class="o-card">
+            <h3 class="o-card-title">
+              <span class="material-symbols-outlined" style="color:var(--primary);">local_shipping</span>
+              Delivery Address
+            </h3>
+
+            <div id="formAlert" class="o-alert"></div>
+
+            <div class="fg">
+              <label>Full Name *</label>
+              <input type="text" id="fFullName" placeholder="Rahul Sharma" autocomplete="name" />
+            </div>
+            <div class="fg">
+              <label>Phone Number *</label>
+              <input type="tel" id="fPhone" placeholder="+91 98765 43210" autocomplete="tel" />
+            </div>
+            <div class="fg">
+              <label>Address Line 1 *</label>
+              <input type="text" id="fAddr1" placeholder="Flat 4B, Prestige Tower" autocomplete="address-line1" />
+            </div>
+            <div class="fg">
+              <label>Address Line 2</label>
+              <input type="text" id="fAddr2" placeholder="MG Road, Indiranagar (optional)" autocomplete="address-line2" />
+            </div>
+            <div class="two-col">
+              <div class="fg">
+                <label>City *</label>
+                <input type="text" id="fCity" placeholder="Bengaluru" autocomplete="address-level2" />
+              </div>
+              <div class="fg">
+                <label>State *</label>
+                <select id="fState">
+                  <option value="">Select state</option>
+                  <option>Andhra Pradesh</option><option>Arunachal Pradesh</option>
+                  <option>Assam</option><option>Bihar</option><option>Chhattisgarh</option>
+                  <option>Goa</option><option>Gujarat</option><option>Haryana</option>
+                  <option>Himachal Pradesh</option><option>Jharkhand</option>
+                  <option>Karnataka</option><option>Kerala</option>
+                  <option>Madhya Pradesh</option><option>Maharashtra</option>
+                  <option>Manipur</option><option>Meghalaya</option><option>Mizoram</option>
+                  <option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+                  <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option>
+                  <option>Telangana</option><option>Tripura</option>
+                  <option>Uttar Pradesh</option><option>Uttarakhand</option>
+                  <option>West Bengal</option><option>Delhi</option>
+                </select>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="fg">
+                <label>PIN Code *</label>
+                <input type="text" id="fPin" placeholder="560001" maxlength="6" autocomplete="postal-code" />
+              </div>
+              <div class="fg">
+                <label>Country</label>
+                <input type="text" value="India" readonly style="opacity:.5;cursor:not-allowed;" />
+              </div>
+            </div>
+            <div class="fg">
+              <label>Delivery Instructions</label>
+              <textarea id="fNote" placeholder="Leave at door, call before delivery, etc. (optional)"></textarea>
+            </div>
+
+            <button class="btn-order" id="placeOrderBtn">Place Order →</button>
+            <p style="text-align:center;font-size:.72rem;color:var(--on-surface-variant);margin:.75rem 0 0;">
+              🔒 Your information is encrypted and stored securely
+            </p>
+          </div>
+
+        </div>
+      </div><!-- /stateForm -->
+
+    </div>
+  </main>
+
+  <!-- Bottom nav (mobile) -->
+  <nav class="bottom-nav">
+    <a href="/dashboard"><span class="material-symbols-outlined">home</span><span>Home</span></a>
+    <a href="/auction"><span class="material-symbols-outlined">sensors</span><span>Live</span></a>
+    <a href="/watchlist"><span class="material-symbols-outlined">favorite</span><span>Saved</span></a>
+    <a href="/wallet"><span class="material-symbols-outlined">payments</span><span>Wallet</span></a>
+  </nav>
+
+<script src="/static/js/nav.js" defer></script>
+<script>
+(function () {
+  'use strict';
+
+  function inr(p) {
+    return '₹' + (p / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+  function showAlert(msg, isErr) {
+    const el = document.getElementById('formAlert');
+    el.textContent = msg;
+    el.className = 'o-alert ' + (isErr ? 'err' : 'ok');
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function hideAlert() {
+    document.getElementById('formAlert').style.display = 'none';
+  }
+
+  // Payment method styling
+  document.querySelectorAll('.pay-opt').forEach(function (label) {
+    label.addEventListener('click', function () {
+      document.querySelectorAll('.pay-opt').forEach(l => l.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  // Get order ID from URL path: /order/<id>
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  const orderId   = pathParts[pathParts.length - 1];
+
+  let orderData   = null;
+  let auctionData = null;
+
+  function setState(name) {
+    ['Loading', 'Error', 'Success', 'Form'].forEach(s => {
+      const el = document.getElementById('state' + s);
+      if (el) el.style.display = s === name ? (s === 'Form' ? 'block' : 'block') : 'none';
+    });
+  }
+
+  async function init() {
+    // Auth guard
+    try {
+      const authRes = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!authRes.ok) { window.location.href = '/login'; return; }
+      const authData = await authRes.json();
+      if (authData.user && authData.user.avatar_url) {
+        document.getElementById('navAvatar').src = authData.user.avatar_url;
+      }
+    } catch {
+      window.location.href = '/login';
+      return;
+    }
+
+    // Logout
+    document.getElementById('logoutLink').addEventListener('click', async function (e) {
+      e.preventDefault();
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      window.location.href = '/login';
+    });
+
+    // Wallet balance
+    try {
+      const wb = await fetch('/api/wallet/balance', { credentials: 'include' });
+      if (wb.ok) {
+        const wd = await wb.json();
+        document.getElementById('walletBal').textContent = inr(wd.balance_paise || 0);
+      }
+    } catch {}
+
+    if (!orderId || orderId === 'order') {
+      setState('Error');
+      document.getElementById('errorMsg').textContent = 'No order ID found. Please go back and try again.';
+      return;
+    }
+
+    // Load order from API
+    try {
+      const res  = await fetch('/api/orders/' + orderId, { credentials: 'include' });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setState('Error');
+        document.getElementById('errorMsg').textContent = data.error || 'Order not found.';
+        return;
+      }
+
+      orderData   = data.order;
+      auctionData = data.auction;
+
+      // Already completed?
+      if (orderData.status !== 'pending_payment') {
+        setState('Success');
+        document.getElementById('successOrderId').textContent = 'Order ID: ' + (orderData.id || orderId);
+        return;
+      }
+
+      renderForm();
+    } catch (e) {
+      setState('Error');
+      document.getElementById('errorMsg').textContent = 'Failed to load order. Please try again.';
+    }
+  }
+
+  function renderForm() {
+    setState('Form');
+
+    // Fill item details
+    const img = auctionData && auctionData.image_url
+      ? auctionData.image_url
+      : 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=400&auto=format&fit=crop&q=80';
+    document.getElementById('itemImg').src = img;
+    document.getElementById('itemTitle').textContent = auctionData ? auctionData.title : 'Auction Item';
+
+    const amt = orderData.amount || 0;
+    document.getElementById('itemAmount').textContent = inr(amt);
+    document.getElementById('priceItem').textContent  = inr(amt);
+    document.getElementById('priceTotal').textContent = inr(amt);
+  }
+
+  async function placeOrder() {
+    hideAlert();
+    const method   = document.querySelector('input[name="payMethod"]:checked')?.value || 'cod';
+    const fullName = document.getElementById('fFullName').value.trim();
+    const phone    = document.getElementById('fPhone').value.trim();
+    const addr1    = document.getElementById('fAddr1').value.trim();
+    const addr2    = document.getElementById('fAddr2').value.trim();
+    const city     = document.getElementById('fCity').value.trim();
+    const state    = document.getElementById('fState').value.trim();
+    const pin      = document.getElementById('fPin').value.trim();
+    const note     = document.getElementById('fNote').value.trim();
+
+    if (!fullName) { showAlert('Please enter your full name.', true); return; }
+    if (!phone)    { showAlert('Please enter your phone number.', true); return; }
+    if (!addr1)    { showAlert('Please enter your address.', true); return; }
+    if (!city)     { showAlert('Please enter your city.', true); return; }
+    if (!state)    { showAlert('Please select your state.', true); return; }
+    if (!/^\d{6}$/.test(pin)) { showAlert('Please enter a valid 6-digit PIN code.', true); return; }
+
+    const btn = document.getElementById('placeOrderBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Placing order…';
+
+    const address = {
+      full_name:    fullName,
+      phone:        phone,
+      address_line: addr1 + (addr2 ? ', ' + addr2 : ''),
+      city:         city,
+      state:        state,
+      pincode:      pin,
+      country:      'India',
+      instructions: note,
+    };
+
+    // Razorpay online payment
+    if (method === 'razorpay') {
+      try {
+        // Create Razorpay order
+        const orderRes  = await fetch('/api/wallet/razorpay/order', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: orderData.amount }),
+        });
+        const orderRzp = await orderRes.json();
+        if (!orderRes.ok) {
+          showAlert(orderRzp.error || 'Failed to initiate payment.', true);
+          btn.disabled = false; btn.textContent = 'Place Order →';
+          return;
+        }
+
+        if (orderRzp.sandbox) {
+          // Sandbox mode
+          await confirmOrder(method, address);
+          return;
+        }
+
+        // Load Razorpay SDK
+        if (!window.Razorpay) {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+
+        const options = {
+          key:         orderRzp.key,
+          amount:      orderData.amount,
+          currency:    'INR',
+          name:        'Flexy',
+          description: 'Auction Order: ' + (auctionData ? auctionData.title : ''),
+          order_id:    orderRzp.order_id,
+          theme:       { color: '#c899ff' },
+          handler: async function (response) {
+            // Payment successful — confirm the order
+            await confirmOrder(method, address, {
+              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature:  response.razorpay_signature,
+            });
+          },
+          modal: {
+            ondismiss: function () {
+              btn.disabled = false;
+              btn.textContent = 'Place Order →';
+            }
+          }
+        };
+        new window.Razorpay(options).open();
+
+      } catch (err) {
+        showAlert('Payment error: ' + err.message, true);
+        btn.disabled = false; btn.textContent = 'Place Order →';
+      }
+      return;
+    }
+
+    // Wallet or COD
+    await confirmOrder(method, address);
+  }
+
+  async function confirmOrder(method, address, rzpData) {
+    const btn = document.getElementById('placeOrderBtn');
+    try {
+      const payload = { method, address };
+      if (rzpData) Object.assign(payload, rzpData);
+
+      const res  = await fetch('/api/orders/' + orderId + '/pay', {
+        method:      'POST',
+        credentials: 'include',
+        headers:     { 'Content-Type': 'application/json' },
+        body:        JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setState('Success');
+        document.getElementById('successOrderId').textContent = 'Order ID: ' + orderId;
+      } else {
+        showAlert(data.error || 'Could not place order. Please try again.', true);
+        btn.disabled = false; btn.textContent = 'Place Order →';
+      }
+    } catch {
+      showAlert('Network error. Please check your connection.', true);
+      btn.disabled = false; btn.textContent = 'Place Order →';
+    }
+  }
+
+  document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
+
+  // Boot
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+</body>
+</html>

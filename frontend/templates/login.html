@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexy – Login</title>  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/login.css" />
+</head>
+<body>
+<main class="login-page">
+
+  <!-- Left Panel -->
+  <section class="login-left">
+    <div class="login-left-bg">
+      <img src="https://images.unsplash.com/photo-1605792657660-596af9009e82?w=900&auto=format&fit=crop&q=80" alt="Luxury auction" />
+    </div>
+    <div class="login-brand"><a href="/login" class="brand-logo">Flexy</a></div>
+    <div class="login-content">
+      <h1>Own the <span>Moment</span> of Impact.</h1>
+      <p>India's most elite high-velocity bidding platform for luxury collectibles, rare antiques, and high-end artifacts.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-value">4.2s</span><span class="stat-label">Avg Bidding Speed</span></div>
+        <div class="stat-card"><span class="stat-value">₹12Cr+</span><span class="stat-label">Total Volume</span></div>
+      </div>
+    </div>
+    <div class="login-footer-quote"><div class="line"></div><span>Refining the art of the deal</span></div>
+  </section>
+
+  <!-- Right Panel -->
+  <section class="login-right">
+    <div class="mobile-brand"><a href="/login" class="brand-logo">Flexy</a></div>
+    <div class="login-form-wrap">
+
+      <header class="login-header">
+        <h2 id="panelTitle">Welcome Back</h2>
+        <p id="panelSubtitle">Enter your credentials to access the floor.</p>
+      </header>
+
+      <div id="alertMsg" style="display:none;margin-bottom:1rem;padding:.75rem 1rem;border-radius:.5rem;font-size:.875rem;"></div>
+
+      <!-- ══ LOGIN FORM ══ -->
+      <form id="loginForm" class="login-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input class="form-input" type="email" id="email" placeholder="alex@flexy.in" autocomplete="email" />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label-row">
+            <label class="form-label" for="password">Password</label>
+            <a href="#" class="form-forgot" id="forgotLink">Forgot password?</a>
+          </div>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="pw-toggle" id="pwToggle" tabindex="-1" style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--on-surface-variant);padding:.25rem;">
+              <span class="material-symbols-outlined" style="font-size:1.1rem;">visibility</span>
+            </button>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;cursor:pointer;font-size:.875rem;color:var(--on-surface-variant);">
+          <input type="checkbox" id="rememberMe" style="accent-color:var(--primary);width:1rem;height:1rem;" />
+          Keep me signed in for 30 days
+        </label>
+        <button type="submit" id="submitBtn" class="submit-btn">Enter the Exchange</button>
+      </form>
+
+      <!-- ══ MFA PANEL ══ -->
+      <div id="mfaPanel" style="display:none;">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <span class="material-symbols-outlined" style="font-size:3rem;color:var(--primary);">phonelink_lock</span>
+          <p style="color:var(--on-surface-variant);margin-top:.5rem;font-size:.9rem;">Enter the 6-digit code from your authenticator app.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Authenticator Code</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">pin</span>
+            <input class="form-input" type="text" id="mfaCode" placeholder="123456" maxlength="6" autocomplete="one-time-code" style="letter-spacing:.3em;font-size:1.25rem;text-align:center;" />
+          </div>
+        </div>
+        <button type="button" id="submitMfaBtn" class="submit-btn">Verify MFA</button>
+        <button type="button" id="cancelMfaBtn" style="width:100%;margin-top:.5rem;padding:.75rem;background:transparent;border:1px solid var(--outline-variant);border-radius:.75rem;color:var(--on-surface-variant);font-family:var(--font-headline);font-weight:600;font-size:.875rem;cursor:pointer;">← Back to Login</button>
+      </div>
+
+      <!-- ══ EMAIL OTP Verify PANEL ══ -->
+      <div id="verifyEmailPanel" style="display:none;">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <span class="material-symbols-outlined" style="font-size:3rem;color:var(--primary);">mark_email_read</span>
+          <p style="color:var(--on-surface-variant);margin-top:.5rem;font-size:.9rem;">We sent a 6-digit OTP to your email. Enter it below to activate your account.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email OTP</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">dialpad</span>
+            <input class="form-input" type="text" id="emailOtpCode" placeholder="123456" maxlength="6" autocomplete="one-time-code" style="letter-spacing:.3em;font-size:1.25rem;text-align:center;" />
+          </div>
+        </div>
+        <button type="button" id="verifyEmailBtn" class="submit-btn">Verify Account</button>
+        <button type="button" id="resendEmailBtn" style="width:100%;margin-top:.5rem;padding:.75rem;background:transparent;border:1px dashed var(--outline-variant);border-radius:.75rem;color:var(--primary);font-family:var(--font-headline);font-weight:600;font-size:.875rem;cursor:pointer;">Resend OTP</button>
+        <button type="button" id="cancelVerifyBtn" style="width:100%;margin-top:.5rem;padding:.75rem;background:transparent;border:1px solid var(--outline-variant);border-radius:.75rem;color:var(--on-surface-variant);font-family:var(--font-headline);font-weight:600;font-size:.875rem;cursor:pointer;">← Back to Login</button>
+      </div>
+
+      <!-- ══ FORGOT PASSWORD PANEL ══ -->
+      <form id="forgotForm" class="login-form" novalidate style="display:none;flex-direction:column;gap:1rem;">
+        <p style="color:var(--on-surface-variant);font-size:.875rem;">Enter your email and we'll send a reset link valid for 1 hour.</p>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input class="form-input" type="email" id="forgotEmail" placeholder="alex@flexy.in" />
+          </div>
+        </div>
+        <button type="submit" id="forgotSubmitBtn" class="submit-btn">Send Reset Link</button>
+        <button type="button" id="backToLoginBtn" style="width:100%;padding:.75rem;background:transparent;border:1px solid var(--outline-variant);border-radius:.75rem;color:var(--on-surface-variant);font-family:var(--font-headline);font-weight:600;font-size:.875rem;cursor:pointer;">← Back to Login</button>
+      </form>
+
+      <footer class="login-form-footer" id="loginFooter">
+        Don't have an account? <a href="/signup">Sign up for Flexy</a>
+      </footer>
+    </div>
+    <div class="login-compliance">
+      <a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Security</a>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  let pendingEmail = '', pendingPassword = '';
+
+  /* ── helpers ── */
+  function showAlert(msg, isErr = true) {
+    const el = document.getElementById('alertMsg');
+    el.innerHTML = msg;
+    el.style.cssText = `display:block;background:${isErr?'rgba(255,110,132,.1)':'rgba(0,227,253,.1)'};color:${isErr?'#ff6e84':'#00e3fd'};border:1px solid ${isErr?'rgba(255,110,132,.3)':'rgba(0,227,253,.3)'};padding:.75rem 1rem;border-radius:.5rem;font-size:.875rem;margin-bottom:1rem;`;
+  }
+  function hide(id){ document.getElementById(id).style.display='none'; }
+  function show(id, disp='block'){ document.getElementById(id).style.display=disp; }
+
+  /* ── show/hide password ── */
+  document.getElementById('pwToggle').addEventListener('click', function() {
+    const inp = document.getElementById('password');
+    const icon = this.querySelector('.material-symbols-outlined');
+    if (inp.type === 'password') { inp.type='text'; icon.textContent='visibility_off'; }
+    else { inp.type='password'; icon.textContent='visibility'; }
+  });
+
+  /* ── auto-format OTP input ── */
+  document.getElementById('mfaCode').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').slice(0,6);
+  });
+  document.getElementById('emailOtpCode').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').slice(0,6);
+  });
+
+  /* ── Startup check for ?verify_email= URL parameter ── */
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('verify_email')) {
+    pendingEmail = urlParams.get('verify_email');
+    hide('loginForm'); hide('loginFooter');
+    show('verifyEmailPanel');
+    document.getElementById('panelTitle').textContent = 'Verify Email';
+    document.getElementById('panelSubtitle').textContent = 'Activate your account.';
+    
+    // Auto-send a resend if you want, or just wait for them to type the OTP since it should have been generated on signup
+    showAlert('Please check your email for the OTP.', false);
+  }
+
+  /* ── Login form ── */
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('submitBtn');
+    if (!email || !password) { showAlert('Please fill in all fields'); return; }
+    btn.disabled = true; btn.textContent = 'Entering…';
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.location.href = '/dashboard';
+      } else if (data.mfa_required) {
+        pendingEmail = email; pendingPassword = password;
+        hide('loginForm'); hide('loginFooter');
+        show('mfaPanel');
+        document.getElementById('panelTitle').textContent = 'Two-Factor Auth';
+        document.getElementById('panelSubtitle').textContent = 'Confirm your identity.';
+        document.getElementById('mfaCode').focus();
+      } else if (data.unverified) {
+        pendingEmail = email;
+        hide('loginForm'); hide('loginFooter');
+        show('verifyEmailPanel');
+        document.getElementById('panelTitle').textContent = 'Verify Email';
+        document.getElementById('panelSubtitle').textContent = 'Activate your account.';
+        document.getElementById('emailOtpCode').focus();
+        showAlert('Your email is not verified. Please enter your OTP, or click Resend.');
+      } else {
+        showAlert(data.error || 'Invalid credentials');
+        document.getElementById('loginForm').style.animation = 'none';
+        setTimeout(() => document.getElementById('loginForm').style.animation = '', 10);
+      }
+    } catch { showAlert('Connection error. Please try again.'); }
+    finally { btn.disabled=false; btn.textContent='Enter the Exchange'; }
+  });
+
+  /* ── MFA Verify ── */
+  document.getElementById('submitMfaBtn').addEventListener('click', async function() {
+    const otp = document.getElementById('mfaCode').value.trim();
+    if (otp.length !== 6) { showAlert('Enter a 6-digit code'); return; }
+    this.disabled = true; this.textContent = 'Verifying…';
+    try {
+      const res  = await fetch('/api/auth/login', {
+        method:'POST', credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: pendingEmail, password: pendingPassword, otp }),
+      });
+      const data = await res.json();
+      if (res.ok) { window.location.href = '/dashboard'; }
+      else { showAlert(data.error || 'Invalid authenticater code'); document.getElementById('mfaCode').value=''; document.getElementById('mfaCode').focus(); }
+    } catch { showAlert('Connection error.'); }
+    finally { this.disabled=false; this.textContent='Verify MFA'; }
+  });
+
+  /* ── Email OTP Verify ── */
+  document.getElementById('verifyEmailBtn').addEventListener('click', async function() {
+    const otp = document.getElementById('emailOtpCode').value.trim();
+    if (otp.length !== 6) { showAlert('Enter a 6-digit OTP code'); return; }
+    this.disabled = true; this.textContent = 'Verifying…';
+    try {
+      const res  = await fetch('/api/auth/verify-otp', {
+        method:'POST',
+        credentials:'include',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: pendingEmail, otp }),
+      });
+      const data = await res.json();
+      if (res.ok) { window.location.href = '/dashboard'; }
+      else { showAlert(data.error || 'Invalid OTP'); document.getElementById('emailOtpCode').value=''; document.getElementById('emailOtpCode').focus(); }
+    } catch { showAlert('Connection error.'); }
+    finally { this.disabled=false; this.textContent='Verify Account'; }
+  });
+
+  /* ── Resend Email OTP ── */
+  document.getElementById('resendEmailBtn').addEventListener('click', async function(e) {
+    e.preventDefault();
+    this.disabled = true; this.textContent = 'Sending...';
+    try {
+      await fetch('/api/auth/resend-verification', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: pendingEmail }),
+      });
+      showAlert('New OTP sent! Check your inbox.', false);
+    } catch { showAlert('Connection error.'); }
+    finally { this.disabled=false; this.textContent='Resend OTP'; }
+  });
+
+  /* ── Back to login logic ── */
+  document.getElementById('cancelMfaBtn').addEventListener('click', cancelToLogin);
+  document.getElementById('cancelVerifyBtn').addEventListener('click', cancelToLogin);
+
+  function cancelToLogin() {
+    hide('mfaPanel'); hide('verifyEmailPanel'); show('loginForm','flex'); show('loginFooter');
+    pendingEmail=''; pendingPassword='';
+    document.getElementById('panelTitle').textContent='Welcome Back';
+    document.getElementById('panelSubtitle').textContent='Enter your credentials to access the floor.';
+  }
+
+  /* ── Forgot password ── */
+  document.getElementById('forgotLink').addEventListener('click', function(e) {
+    e.preventDefault();
+    hide('loginForm'); hide('loginFooter');
+    show('forgotForm','flex');
+    document.getElementById('panelTitle').textContent = 'Forgot Password';
+    document.getElementById('panelSubtitle').textContent = 'We\'ll email you a reset link.';
+  });
+  document.getElementById('backToLoginBtn').addEventListener('click', function() {
+    hide('forgotForm'); show('loginForm','flex'); show('loginFooter');
+    document.getElementById('panelTitle').textContent = 'Welcome Back';
+    document.getElementById('panelSubtitle').textContent = 'Enter your credentials to access the floor.';
+  });
+  document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgotEmail').value.trim();
+    const btn   = document.getElementById('forgotSubmitBtn');
+    if (!email) { showAlert('Enter your email address'); return; }
+    btn.disabled=true; btn.textContent='Sending…';
+    try {
+      const res  = await fetch('/api/auth/forgot-password', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      showAlert(data.message || 'Reset link sent.', false);
+    } catch { showAlert('Connection error.'); }
+    finally { btn.disabled=false; btn.textContent='Send Reset Link'; }
+  });
+})();
+</script>
+</body>
+</html>

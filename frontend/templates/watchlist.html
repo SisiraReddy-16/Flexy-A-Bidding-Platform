@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexy | Wishlist</title>  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <style>
+    .notif-badge-wrap{position:relative;display:inline-flex;}
+    .notif-badge{position:absolute;top:-.2rem;right:-.2rem;background:var(--error);color:#fff;font-size:.6rem;font-weight:800;min-width:1rem;height:1rem;border-radius:9999px;display:none;align-items:center;justify-content:center;padding:0 .2rem;}
+  </style>
+</head>
+<body class="dashboard-body">
+  <nav class="top-nav"><div class="top-nav-inner">
+    <div style="display:flex;align-items:center;gap:2rem;">
+      <a href="/dashboard" class="brand-logo">Flexy</a>
+      <div class="top-nav-links"><a href="/dashboard">Explore</a><a href="/auction">Live</a><a href="/wallet">Wallet</a></div>
+    </div>
+    <div class="top-nav-right">
+      <div class="nav-search"><span class="material-symbols-outlined" style="color:var(--outline);font-size:1rem;">search</span><input type="text" placeholder="Search auctions…" /></div>
+      <a href="/notifications" class="nav-icon-btn notif-badge-wrap" style="text-decoration:none;"><span class="material-symbols-outlined">notifications</span><span class="notif-badge">0</span></a>
+      <button class="nav-icon-btn" onclick="window.location.href='/wallet'"><span class="material-symbols-outlined">account_balance_wallet</span></button>
+      <div class="nav-avatar" onclick="window.location.href='/settings'" style="cursor:pointer;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User" /></div>
+    </div>
+  </div></nav>
+  <aside class="side-nav">
+    <div class="side-nav-brand"><h2>Flexy Beta</h2><p>High-Velocity Bidding</p></div>
+    <nav class="side-nav-links">
+      <a href="/dashboard"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+      <a href="/auction"><span class="material-symbols-outlined">bolt</span><span>Live Auctions</span></a>
+      <a href="/create"><span class="material-symbols-outlined">add_circle</span><span>Create Auction</span></a>
+      <a href="/watchlist" class="active"><span class="material-symbols-outlined filled">favorite</span><span>Wishlist</span></a>
+      <a href="/my-orders"><span class="material-symbols-outlined">package_2</span><span>My Orders</span></a>
+      <a href="/wallet"><span class="material-symbols-outlined">account_balance_wallet</span><span>Wallet</span></a>
+    </nav>
+    <div class="side-nav-bottom"><nav class="side-nav-links">
+      <a href="/settings"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+      <a href="/login"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+    </nav></div>
+  </aside>
+  <main class="main-with-sidebar" style="padding-bottom:5rem;">
+    <h2 style="font-size:1.75rem;font-weight:800;margin-bottom:2rem;">❤️ My Wishlist</h2>
+    <section class="auction-grid" id="watchGrid"></section>
+  </main>
+  <nav class="bottom-nav">
+    <a href="/dashboard"><span class="material-symbols-outlined">home</span><span>Home</span></a>
+    <a href="/auction"><span class="material-symbols-outlined">sensors</span><span>Live</span></a>
+    <a href="/watchlist" class="active"><span class="material-symbols-outlined filled">favorite</span><span>Saved</span></a>
+    <a href="/wallet"><span class="material-symbols-outlined">payments</span><span>Wallet</span></a>
+  </nav>
+  <script src="/static/js/nav.js" defer></script>
+  <script>
+  function inr(p){return '₹'+(p/100).toLocaleString('en-IN',{minimumFractionDigits:0});}
+  function fmt(iso){const s=Math.max(0,Math.floor((new Date(iso)-Date.now())/1000));const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;if(h>0)return String(h).padStart(2,'0')+'h '+String(m).padStart(2,'0')+'m';if(m>0)return String(m).padStart(2,'0')+'m '+String(sec).padStart(2,'0')+'s';return String(sec).padStart(2,'0')+'s';}
+  async function load(){
+    const res = await fetch('/api/watchlist/',{credentials:'include'});
+    if(!res.ok){window.location.href='/login';return;}
+    const data = await res.json();
+    const grid = document.getElementById('watchGrid');
+    if(!data.watchlist.length){grid.innerHTML='<p style="color:var(--on-surface-variant);grid-column:1/-1;text-align:center;padding:3rem 0;">Your watchlist is empty. <a href="/dashboard" style="color:var(--primary);">Browse auctions →</a></p>';return;}
+    grid.innerHTML = data.watchlist.map(a=>`
+      <div class="auction-card" onclick="window.location.href='/auction/${a.id}'" style="cursor:pointer;">
+        <div class="card-img-wrap">
+          <img src="${a.image_url||'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=600&auto=format&fit=crop&q=80'}" alt="${a.title}" loading="lazy"/>
+          <div class="card-timer-badge dark"><span class="material-symbols-outlined" style="font-size:.875rem;">schedule</span><span data-ends="${a.ends_at}">${fmt(a.ends_at)}</span></div>
+        </div>
+        <div class="card-body">
+          <p style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);margin-bottom:.25rem;">${a.category}</p>
+          <h3 class="card-title">${a.title}</h3>
+          <div class="card-footer">
+            <div><p class="bid-label">Current Bid</p><p class="bid-amount">${inr(a.current_bid)}</p></div>
+            <button class="btn-bid" onclick="event.stopPropagation();window.location.href='/auction/${a.id}'">Bid Now</button>
+          </div>
+        </div>
+      </div>`).join('');
+    setInterval(()=>document.querySelectorAll('[data-ends]').forEach(e=>e.textContent=fmt(e.dataset.ends)),1000);
+  }
+  load();
+  </script>
+</body></html>

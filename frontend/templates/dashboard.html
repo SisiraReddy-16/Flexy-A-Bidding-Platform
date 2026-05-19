@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexy Dashboard – High-Velocity Bidding</title>  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <style>
+    .section-row { display:flex;gap:1rem;overflow-x:auto;padding-bottom:.75rem;scrollbar-width:thin; }
+    .section-row .auction-card { min-width:260px;max-width:280px;flex-shrink:0; }
+    .section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem; }
+    .section-title { font-size:1.1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:.5rem; }
+    .section-live-dot { width:.6rem;height:.6rem;border-radius:50%;background:var(--error);animation:pulse 1.2s infinite; }
+    .see-all-link { font-size:.8rem;color:var(--primary);text-decoration:none;font-weight:600; }
+    .hero-dots { display:flex;gap:.4rem;margin-top:.75rem; }
+    .hero-dot { width:.5rem;height:.5rem;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:.2s; }
+    .hero-dot.active { background:var(--primary);transform:scale(1.3); }
+    .cat-pills-row { display:flex;gap:.6rem;overflow-x:auto;padding-bottom:.5rem;flex-wrap:nowrap;scrollbar-width:none; }
+    .notif-badge-wrap { position:relative;display:inline-flex; }
+    .notif-badge { position:absolute;top:-.2rem;right:-.2rem;background:var(--error);color:#fff;font-size:.6rem;font-weight:800;min-width:1rem;height:1rem;border-radius:9999px;display:none;align-items:center;justify-content:center;padding:0 .2rem; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  </style>
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <div style="display:flex;align-items:center;gap:2rem;">
+        <a href="/dashboard" class="brand-logo">Flexy</a>
+        <div class="top-nav-links">
+          <a href="/dashboard" class="active">Explore</a>
+          <a href="/auction">Live</a>
+          <a href="/wallet">Wallet</a>
+        </div>
+      </div>
+      <div class="top-nav-right">
+        <div class="nav-search">
+          <span class="material-symbols-outlined" style="color:var(--outline);font-size:1rem;">search</span>
+          <input type="text" placeholder="Search auctions…" />
+        </div>
+        <a href="/notifications" class="nav-icon-btn notif-badge-wrap" aria-label="Notifications" style="text-decoration:none;">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" id="notifBadge">0</span>
+        </a>
+        <button class="nav-icon-btn" onclick="window.location.href='/wallet'">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </button>
+        <div class="nav-avatar" onclick="window.location.href='/settings'" style="cursor:pointer;">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User" />
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Side Nav -->
+  <aside class="side-nav">
+    <div class="side-nav-brand">
+      <h2>Flexy Beta</h2>
+      <p>High-Velocity Bidding</p>
+    </div>
+    <nav class="side-nav-links">
+      <a href="/dashboard" class="active"><span class="material-symbols-outlined filled">dashboard</span><span>Dashboard</span></a>
+      <a href="/auction"><span class="material-symbols-outlined">bolt</span><span>Live Auctions</span></a>
+      <a href="/create"><span class="material-symbols-outlined">add_circle</span><span>Create Auction</span></a>
+      <a href="/watchlist"><span class="material-symbols-outlined">favorite</span><span>Wishlist</span></a>
+      <a href="/my-orders"><span class="material-symbols-outlined">package_2</span><span>My Orders</span></a>
+      <a href="/wallet"><span class="material-symbols-outlined">account_balance_wallet</span><span>Wallet</span></a>
+      <a href="/notifications" class="notif-badge-wrap"><span class="material-symbols-outlined">notifications</span><span>Notifications</span><span class="notif-badge" style="position:static;margin-left:auto;">0</span></a>
+    </nav>
+    <div class="side-nav-cta">
+      <button onclick="window.location.href='/auction'">Start Bidding</button>
+    </div>
+    <div class="side-nav-bottom">
+      <nav class="side-nav-links">
+        <a href="/settings"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+        <a href="/login"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-with-sidebar">
+
+    <!-- Hero Carousel -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-gradient"></div>
+      <img class="hero-img" id="heroImg" src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=1200&auto=format&fit=crop&q=80" alt="Featured Auction" />
+      <div class="hero-content">
+        <div class="hero-badges">
+          <span class="badge-live"><span class="dot"></span> Live Now</span>
+          <span class="badge-timer" id="heroTimer">Loading…</span>
+        </div>
+        <h1 id="heroTitle">Loading featured auction…</h1>
+        <p id="heroDesc" style="margin-bottom:.5rem;"></p>
+        <div class="hero-dots" id="heroDots"></div>
+        <div class="hero-bid-row" style="margin-top:1rem;">
+          <div>
+            <p class="hero-bid-label">Current Bid</p>
+            <p class="hero-bid-amount" id="heroBid">₹—</p>
+          </div>
+          <button class="btn-primary" id="heroBidBtn">Place Bid</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- My Categories -->
+    <section style="margin-bottom:2.5rem;">
+      <div class="section-header">
+        <span class="section-title">My Categories</span>
+        <a href="/dashboard" class="see-all-link">Browse all</a>
+      </div>
+      <div class="cat-pills-row" id="myCatsRow"></div>
+    </section>
+
+    <!-- Live Now -->
+    <section style="margin-bottom:2.5rem;">
+      <div class="section-header">
+        <span class="section-title"><span class="section-live-dot"></span> Live Now</span>
+        <a href="/auction" class="see-all-link">See all →</a>
+      </div>
+      <div class="section-row" id="liveNowRow">
+        <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+      </div>
+    </section>
+
+    <!-- Upcoming Auctions -->
+    <section style="margin-bottom:2.5rem;">
+      <div class="section-header">
+        <span class="section-title">⏳ Upcoming Auctions</span>
+        <a href="/dashboard?status=upcoming" class="see-all-link">See all →</a>
+      </div>
+      <div class="section-row" id="upcomingRow">
+        <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+      </div>
+    </section>
+
+    <!-- Filters + Sort for main grid -->
+    <section class="filters-section">
+      <div class="filter-pills">
+        <button class="pill active">All Items</button>
+        <button class="pill">Watches</button>
+        <button class="pill">Mobiles</button>
+        <button class="pill">Shoes</button>
+        <button class="pill">Art</button>
+        <button class="pill">Electronics</button>
+        <button class="pill">Jewellery</button>
+        <button class="pill">Bags</button>
+        <button class="pill">Collectibles</button>
+        <button class="pill">Antiques</button>
+        <button class="pill">Sunglasses</button>
+      </div>
+      <div class="sort-group">
+        <span class="sort-label">Sort By:</span>
+        <select class="sort-select">
+          <option>Ending Soonest</option>
+          <option>Highest Bid</option>
+          <option>Newest</option>
+          <option>Most Popular</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="auction-grid" id="auctionGrid"></section>
+
+    <div class="load-more-wrap">
+      <button class="btn-load-more" id="loadMoreBtn">
+        Show more auctions <span class="material-symbols-outlined">expand_more</span>
+      </button>
+    </div>
+
+    <!-- Popular Auctions -->
+    <section style="margin-top:3rem;margin-bottom:2.5rem;">
+      <div class="section-header">
+        <span class="section-title">🔥 Popular Auctions</span>
+        <a href="/dashboard?sort=popular" class="see-all-link">See all →</a>
+      </div>
+      <div class="section-row" id="popularRow">
+        <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+      </div>
+    </section>
+
+    <!-- Ended Auctions -->
+    <section style="margin-bottom:2.5rem;">
+      <div class="section-header">
+        <span class="section-title">🏁 Recently Ended</span>
+        <a href="/dashboard?status=ended" class="see-all-link">See all →</a>
+      </div>
+      <div class="section-row" id="endingSoonRow">
+        <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="/dashboard" class="active"><span class="material-symbols-outlined filled">home</span><span>Home</span></a>
+    <a href="/auction"><span class="material-symbols-outlined">sensors</span><span>Live</span></a>
+    <a href="/watchlist"><span class="material-symbols-outlined">favorite</span><span>Saved</span></a>
+    <a href="/wallet"><span class="material-symbols-outlined">payments</span><span>Wallet</span></a>
+  </nav>
+
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/dashboard.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <title>Flexy | Live Auction Detail</title>
+  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/auction.css" />
+</head>
+<body>
+
+  <!-- ══ Top Nav ══ -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div style="display:flex;align-items:center;gap:2rem;">
+        <a href="/login" class="brand-logo">Flexy</a>
+        <div class="top-nav-links">
+          <a href="/dashboard">Explore</a>
+          <a href="/auction" class="active">Live</a>
+          <a href="/wallet">Wallets</a>
+        </div>
+      </div>
+      <div class="top-nav-right">
+        <div class="nav-search">
+          <span class="material-symbols-outlined" style="color:var(--secondary);font-size:0.875rem;">search</span>
+          <input type="text" placeholder="Search auctions..." />
+        </div>
+        <button class="nav-icon-btn"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="nav-icon-btn" onclick="window.location.href='/wallet'">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </button>
+        <div class="nav-avatar">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=flexy" alt="User" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ Side Nav ══ -->
+  <aside class="side-nav">
+    <div class="side-nav-brand" style="display:flex;align-items:center;gap:0.75rem;padding:5rem 1.5rem 2rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:0.75rem;background:linear-gradient(135deg,var(--primary),var(--primary-dim));display:flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined filled" style="color:var(--on-primary);font-size:1.25rem;">bolt</span>
+      </div>
+      <div>
+        <h2 style="font-family:var(--font-headline);font-size:1.25rem;font-weight:700;color:var(--primary);">Flexy Beta</h2>
+        <p style="font-size:0.625rem;text-transform:uppercase;letter-spacing:0.2em;color:#6b7280;font-weight:700;">High-Velocity Bidding</p>
+      </div>
+    </div>
+    <nav class="side-nav-links">
+      <a href="/dashboard">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/auction" class="active">
+        <span class="material-symbols-outlined filled" style="font-size:1.25rem;">bolt</span>
+        <span>Live Auctions</span>
+      </a>
+      <a href="/create">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">add_circle</span>
+        <span>Create Auction</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">account_balance_wallet</span>
+        <span>Wallet</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">person</span>
+        <span>Profile</span>
+      </a>
+      <a href="/my-orders">
+        <span class="material-symbols-outlined" style="font-size:1.25rem;">package_2</span>
+        <span>My Orders</span>
+      </a>
+    </nav>
+    <div class="side-nav-cta">
+      <button onclick="document.getElementById('placeBidBtn').scrollIntoView({behavior:'smooth'})">Start Bidding</button>
+    </div>
+    <div class="side-nav-bottom">
+      <nav class="side-nav-links">
+        <a href="#"><span class="material-symbols-outlined" style="font-size:1.25rem;">settings</span><span>Settings</span></a>
+        <a href="/login"><span class="material-symbols-outlined" style="font-size:1.25rem;">logout</span><span>Logout</span></a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ══ Main Content ══ -->
+  <main class="main-with-sidebar" style="padding-bottom:5rem;">
+
+    <!-- Live Ticker -->
+    <div class="live-ticker">
+      <span class="ticker-label">
+        <span class="dot"></span> Live Activity
+      </span>
+      <div class="ticker-scroll" id="tickerScroll">
+        <!-- Live activity ticker – populated by JS via WebSocket bid_update events -->
+        <div class="ticker-item">
+          <span class="material-symbols-outlined" style="font-size:1rem;color:var(--primary);">bolt</span>
+          <span>Connecting to live auction feed...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-col grid -->
+    <div class="auction-grid">
+
+      <!-- Product Showcase -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div class="product-main-img">
+          <img
+            src="https://images.unsplash.com/photo-1566132127697-4524fea60007?w=900&auto=format&fit=crop&q=80"
+            alt="Auction Item"
+            id="mainProductImg"
+          />
+          <div class="product-viewers">
+            <div class="viewer-badge">
+              <span class="material-symbols-outlined filled">visibility</span>
+              <span>1,248 Viewing</span>
+            </div>
+          </div>
+          <div class="product-info-overlay">
+            <div class="product-info-top">
+              <div>
+                <h1 class="product-title" id="auctionTitle">Loading auction...</h1>
+                <p class="product-desc" id="auctionDesc">Fetching auction details...</p>
+              </div>
+              <div class="product-actions">
+                <button class="product-action-btn share" title="Share">
+                  <span class="material-symbols-outlined">share</span>
+                </button>
+                <button class="product-action-btn fav" title="Favourite">
+                  <span class="material-symbols-outlined">favorite</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thumbnail Strip -->
+        <div class="thumb-strip">
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2tVwnBfF_cBxJCMPW7Qn08nNw7KqjGeV3cXPH7RWeJmsBwSV8Ob-UsP7YARnxcfH4_ONBHbQ1GiGnWJS-115zzWLAzWX2W5OunlLhaiZR-ivOMJN7KJ3ctDgP_3-haFvQ6wn27OKwBFGm2D8RmjJ9XJ0C46bVey-yLlbWfEKIFX1EIzyMgs-xjVnY76V-Qm05TTMNh55Txh5tIWiHzYZQbQ5mY_O1mw7mPxT_9pf4SfSpfBz4sn_RdmAhATCoN5dh4EjGLPBaxKqq" alt="Keyboard detail" />
+          </div>
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbs1428wHW3dMj_npR56KPH5ywbOTAGnuTIxxBlrZ1Z52h3IyGk-Ldi3ABuEbpLjxncZPy3rUGs_R-n_i9ij-mZ-nEzRPBe8T2uffio5NuNOqkl1aUlCNkPTS5gvJxNhhU4IS5lGa0Zv3DZtYpYoEf9oRp8uwArftcEyhU3boerE95fodm0dVxKXMV4YlLvkqCjHUji6K5SVDprx9_FfXFc_SN9sCay5Ni3zWPux9TSdMRj5QfnAOig3EkwhjpInS9jJM4OQtLgbCB" alt="Circuit board" />
+          </div>
+          <div class="thumb">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2xurS1GGNkQu0WYMTm5VV62NsYuavCTE-5ACF7iEFt2uJsZkbHoSyP_VyObbTIs6eLuBumiw_yJHO7rUAyfVIsSqQFWqgs2A4QxqYXTVcvfjSVh7knu2ROhph2xoUJTEfxxmnoHuFKoSQVQzv-HdxRyOStHIkGqhri48avilwDdgYpJzW6lxVADmIY_tGVe_RDP8srDnf1L3fvhbOxC37RfDZmRZTUmLXZaaiX6Kh3-MUEoM02MGnlEHh7832qqUx3QN536xdOAZg" alt="Component" />
+            <div class="thumb-overlay">+12</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bidding Panel -->
+      <div class="bidding-panel">
+
+        <!-- Bid Card -->
+        <div class="bid-main-card">
+          <div class="bid-top-row">
+            <div>
+              <p class="bid-current-label">Current Bid</p>
+              <div>
+                <span class="bid-current-amount" id="currentBidDisplay">Loading...</span>
+                <span class="bid-current-currency">INR</span>
+              </div>
+            </div>
+            <div class="bid-timer-card">
+              <p class="bid-timer-label">Ends In</p>
+              <div class="bid-timer-value" id="auctionTimer">--:--:--</div>
+              <div class="timer-bar">
+                <div class="timer-bar-fill" id="timerBar" style="width:66%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bid Input -->
+          <div class="bid-input-area">
+            <div class="bid-input-wrap">
+              <span class="bid-currency-sign">₹</span>
+              <input type="number" id="bidInput" class="bid-input" value="" step="100" min="1" placeholder="Enter amount in ₹" />
+              <div class="bid-input-btns">
+                <button class="bid-add-btn" data-add="5000">+ ₹5,000</button>
+                <button class="bid-add-btn" data-add="25000">+ ₹25,000</button>
+              </div>
+            </div>
+            <button id="placeBidBtn" class="btn-place-bid bid-pulse">
+              <span class="material-symbols-outlined filled" style="font-size:1.75rem;">gavel</span>
+              Place Your Bid
+            </button>
+            <p class="bid-min-note" id="minBidNote">Minimum next bid: <span id="minBidSpan">calculating...</span></p>
+          </div>
+        </div>
+
+        <!-- Bid History -->
+        <div class="bid-history-card">
+          <div class="bid-history-header">
+            <h3 class="bid-history-title">Bid History</h3>
+            <span class="bid-count-badge" id="bidCountBadge">0 Bids</span>
+          </div>
+          <div class="bid-history-list custom-scrollbar" id="bidHistoryList">
+            <div style="text-align:center;color:var(--on-surface-variant);padding:2rem 0;font-size:0.875rem;">
+              <span class="material-symbols-outlined" style="font-size:2rem;display:block;margin-bottom:0.5rem;">hourglass_top</span>
+              Loading bid history...
+            </div>
+          </div>          <button class="btn-view-all" id="viewAllBids">View All Bid History</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Details Bento -->
+    <div class="details-bento">
+      <div class="bento-card">
+        <span class="material-symbols-outlined filled">verified_user</span>
+        <h4>Authenticity</h4>
+        <p>This item includes a physical certificate of authenticity and a unique NFT twin for digital verification on the Flexy Blockchain.</p>
+      </div>
+      <div class="bento-card">
+        <span class="material-symbols-outlined filled">local_shipping</span>
+        <h4>Insured Shipping</h4>
+        <p>Global white-glove delivery included. Item is stored in a climate-controlled vault until shipping confirmation.</p>
+      </div>
+      <div class="bento-card">
+        <span class="material-symbols-outlined filled">support_agent</span>
+        <h4>Priority Support</h4>
+        <p>Dedicated auction specialist assigned to the winning bidder to handle all transfer and logistics details.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══ Bottom Nav (Mobile) ══ -->
+  <nav class="bottom-nav">
+    <a href="/dashboard">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="/auction" class="active">
+      <span class="material-symbols-outlined filled">sensors</span>
+      <span>Live</span>
+    </a>
+    <a href="/wallet">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Wallet</span>
+    </a>
+    <a href="/wallet">
+      <span class="material-symbols-outlined">person_outline</span>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/auction.js" defer></script>
+
+
+<!-- Socket.IO client from CDN -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+/* ============================================================
+   Flexy Live Auction – Socket.IO real-time client
+   ============================================================ */
+(function () {
+  'use strict';
+
+  // ── Helpers ──────────────────────────────────────────────────
+  function fmtINR(paise) {
+    return '₹' + (paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  function fmtTime(seconds) {
+    if (seconds <= 0) return '00:00:00';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+  }
+
+  function timeAgo(isoStr) {
+    const diff = Math.floor((Date.now() - new Date(isoStr)) / 1000);
+    if (diff < 60)  return diff + 's ago';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    return Math.floor(diff / 3600) + 'h ago';
+  }
+
+  // ── DOM refs ─────────────────────────────────────────────────
+  const currentBidDisplay = document.getElementById('currentBidDisplay');
+  const auctionTimerEl    = document.getElementById('auctionTimer');
+  const timerBarEl        = document.getElementById('timerBar');
+  const bidHistoryList    = document.getElementById('bidHistoryList');
+  const viewerCountEl     = document.querySelector('.viewer-badge span:last-child');
+  const bidInput          = document.getElementById('bidInput');
+  const minBidNote        = document.getElementById('minBidNote');
+  const placeBidBtn       = document.getElementById('placeBidBtn');
+  const tickerScroll      = document.getElementById('tickerScroll');
+
+  // ── State ────────────────────────────────────────────────────
+  let AUCTION_ID      = null;
+  let currentBidPaise = 0;
+  let auctionEnded    = false;
+  let timerMax        = 0;  // total seconds at load time for progress bar
+  let currentUser     = null;
+
+  // ── Auth guard + load auction ────────────────────────────────
+  async function init() {
+    try {
+      const res = await fetch('/api/auth/me', { credentials: 'include' });
+      if (!res.ok) { window.location.href = '/login'; return; }
+      const d = await res.json();
+      currentUser = d.user;
+    } catch { window.location.href = '/login'; return; }
+
+    // Logout links
+    document.querySelectorAll('a[href="/login"]').forEach(link => {
+      if (link.closest('.side-nav-bottom')) {
+        link.addEventListener('click', async function(e) {
+          e.preventDefault();
+          await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+          window.location.href = '/login';
+        });
+      }
+    });
+
+    // Determine auction ID: from URL path /auction/<id> or query string ?id=
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    if (pathParts.length >= 2 && pathParts[0] === 'auction') {
+      AUCTION_ID = pathParts[1];
+    } else {
+      // Try query param
+      AUCTION_ID = new URLSearchParams(window.location.search).get('id');
+    }
+
+    if (!AUCTION_ID) {
+      // No specific auction – load first active one
+      try {
+        const r = await fetch('/api/auctions/?status=active&limit=1', { credentials: 'include' });
+        const d = await r.json();
+        if (d.auctions && d.auctions.length) {
+          AUCTION_ID = d.auctions[0].id;
+          // Update URL without reload
+          window.history.replaceState({}, '', '/auction/' + AUCTION_ID);
+        }
+      } catch {}
+    }
+
+    if (!AUCTION_ID) {
+      if (auctionTimerEl) auctionTimerEl.textContent = 'No active auctions';
+      return;
+    }
+
+    // Load initial auction data from REST
+    try {
+      const r    = await fetch('/api/auctions/' + AUCTION_ID, { credentials: 'include' });
+      const data = await r.json();
+      if (r.ok && data.auction) {
+        applyAuctionState(data.auction);
+        const endsAt = new Date(data.auction.ends_at);
+        timerMax = Math.max(1, Math.floor((endsAt - Date.now()) / 1000));
+        // Load bid history
+        loadBidHistory();
+      }
+    } catch (e) { console.error('Auction load error:', e); }
+
+    // Connect SocketIO
+    connectSocket();
+
+    // ── Bind bid buttons (independent of socket) ──────────────
+    document.querySelectorAll('.bid-add-btn').forEach(function(btn) {
+      btn.addEventListener('click', function () {
+        if (!bidInput) return;
+        const addInr = parseInt(btn.dataset.add || '0');
+        const current = parseInt(bidInput.value) || 0;
+        bidInput.value = current + addInr;
+        bidInput.focus();
+      });
+    });
+
+    if (placeBidBtn) {
+      placeBidBtn.addEventListener('click', async function () {
+        if (auctionEnded) { showBidMsg('Auction has ended', true); return; }
+        const amountInr = parseFloat(bidInput ? bidInput.value : 0);
+        if (!amountInr || amountInr <= 0) {
+          showBidMsg('Please enter a valid bid amount in ₹', true);
+          return;
+        }
+        const minBidInr = (currentBidPaise / 100) + 1;
+        if (amountInr < minBidInr) {
+          showBidMsg('Bid must exceed ' + fmtINR(currentBidPaise), true);
+          return;
+        }
+
+        placeBidBtn.textContent = 'Placing bid...';
+        placeBidBtn.disabled = true;
+
+        const sock = window._auctionSocket;
+        if (sock && sock.connected) {
+          // Use WebSocket
+          sock.emit('place_bid', { auction_id: AUCTION_ID, amount_inr: amountInr });
+          // Will be re-enabled by bid_error or bid_success handler
+          // Safety timeout in case no response
+          placeBidBtn._safetyTimer = setTimeout(function() {
+            if (placeBidBtn.disabled) {
+              placeBidBtn.textContent = 'Place Bid';
+              placeBidBtn.disabled = false;
+            }
+          }, 5000);
+        } else {
+          // REST fallback when socket not connected
+          try {
+            const res = await fetch('/api/auctions/' + AUCTION_ID + '/bid', {
+              method: 'POST', credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ amount: Math.round(amountInr * 100) })
+            });
+            const data = await res.json();
+            if (res.ok) {
+              showBidMsg('✅ Bid placed: ' + fmtINR(Math.round(amountInr * 100)), false);
+              currentBidPaise = Math.round(amountInr * 100);
+              if (currentBidDisplay) currentBidDisplay.textContent = fmtINR(currentBidPaise);
+            } else {
+              showBidMsg(data.error || 'Bid failed', true);
+            }
+          } catch (err) {
+            showBidMsg('Network error. Please try again.', true);
+          }
+          placeBidBtn.textContent = 'Place Bid';
+          placeBidBtn.disabled = false;
+        }
+      });
+    }
+  }
+
+  function applyAuctionState(auction) {
+    currentBidPaise = auction.current_bid || auction.starting_price || 0;
+    if (currentBidDisplay) currentBidDisplay.textContent = fmtINR(currentBidPaise);
+
+    const minNext = currentBidPaise + 100 * 100; // minimum increment ₹100 (₹100 = 10000 paise)
+    if (bidInput) {
+      bidInput.value = Math.ceil(minNext / 100);  // display in rupees
+      bidInput.min   = Math.ceil(minNext / 100);
+    }
+    // Fix: use id="minBidSpan" 
+    const minSpan = document.getElementById('minBidSpan') ||
+                    (minBidNote && minBidNote.querySelector('span'));
+    if (minSpan) minSpan.textContent = fmtINR(minNext);
+
+    // Update bid count badge
+    const badgeEl = document.getElementById('bidCountBadge');
+    if (badgeEl && auction.bid_count !== undefined) {
+      badgeEl.textContent = auction.bid_count + ' Bid' + (auction.bid_count !== 1 ? 's' : '');
+    }
+
+    // Update product info
+    const titleEl = document.getElementById('auctionTitle') || document.querySelector('.product-title');
+    if (titleEl && auction.title) titleEl.textContent = auction.title;
+
+    const descEl = document.getElementById('auctionDesc') || document.querySelector('.product-desc');
+    if (descEl && auction.description) descEl.textContent = auction.description;
+
+    // Update main product image if auction has one
+    const imgEl = document.getElementById('mainProductImg');
+    if (imgEl && auction.image_url) imgEl.src = auction.image_url;
+
+    // If auction is upcoming (not started yet)
+    if (auction.status === 'upcoming') {
+      auctionEnded = true;
+      if (auctionTimerEl) { auctionTimerEl.textContent = 'UPCOMING'; auctionTimerEl.style.color = '#f59e0b'; }
+      if (placeBidBtn) {
+        placeBidBtn.disabled = true;
+        placeBidBtn.textContent = '⏳ Bidding Not Started';
+        placeBidBtn.style.opacity = '0.5';
+      }
+      return;
+    }
+
+    // If auction ended, disable bidding
+    if (auction.status === 'ended') {
+      auctionEnded = true;
+      if (auctionTimerEl) { auctionTimerEl.textContent = 'ENDED'; auctionTimerEl.style.color = '#ff6e84'; }
+      if (timerBarEl) timerBarEl.style.width = '0%';
+      if (placeBidBtn) {
+        // Show order button ONLY to the winner
+        if (auction.order_id && currentUser && auction.winner_id === currentUser.id) {
+          placeBidBtn.disabled = false;
+          placeBidBtn.textContent = '🏆 Complete Your Order';
+          placeBidBtn.style.opacity = '1';
+          placeBidBtn.style.background = 'linear-gradient(135deg,#00c864,#00a050)';
+          placeBidBtn.onclick = () => window.location.href = '/order/' + auction.order_id;
+        } else {
+          placeBidBtn.disabled = true;
+          placeBidBtn.textContent = 'Auction Ended';
+          placeBidBtn.style.opacity = '0.5';
+        }
+      }
+    } else {
+      // ── ACTIVE auction: set timer immediately from seconds_left ──
+      auctionEnded = false;
+      const secLeft = auction.seconds_left != null ? auction.seconds_left
+                      : Math.max(0, Math.floor((new Date(auction.ends_at) - Date.now()) / 1000));
+      timerMax = timerMax || Math.max(1, secLeft);
+      if (auctionTimerEl) {
+        auctionTimerEl.textContent = fmtTime(secLeft);
+        auctionTimerEl.style.color = secLeft < 300 ? '#ff6e84' : '';
+      }
+      if (timerBarEl && timerMax > 0) {
+        timerBarEl.style.width = Math.min(100, (secLeft / timerMax) * 100) + '%';
+      }
+      // Start a local countdown as backup (so timer ticks even before socket connects)
+      if (!window._localTimerInterval) {
+        let localSec = secLeft;
+        window._localTimerInterval = setInterval(function () {
+          localSec--;
+          if (localSec <= 0) {
+            clearInterval(window._localTimerInterval);
+            window._localTimerInterval = null;
+            return;
+          }
+          // Only update if socket hasn't taken over (socket updates auctionTimerEl via timer_update)
+          // We update only if the element still shows fmtTime(localSec+1) to avoid fighting socket
+          if (auctionTimerEl && auctionTimerEl.textContent !== 'ENDED') {
+            auctionTimerEl.textContent = fmtTime(localSec);
+            auctionTimerEl.style.color = localSec < 300 ? '#ff6e84' : '';
+          }
+          if (timerBarEl && timerMax > 0) {
+            timerBarEl.style.width = Math.min(100, (localSec / timerMax) * 100) + '%';
+          }
+        }, 1000);
+      }
+      if (placeBidBtn) {
+        placeBidBtn.disabled = false;
+        placeBidBtn.textContent = 'Place Bid';
+        placeBidBtn.style.opacity = '1';
+        placeBidBtn.style.background = '';
+        placeBidBtn.onclick = null;
+      }
+    }
+  }
+
+  async function loadBidHistory() {
+    try {
+      const r = await fetch('/api/auctions/' + AUCTION_ID + '/bids?limit=10', { credentials: 'include' });
+      const d = await r.json();
+      if (r.ok && d.bids) renderBidHistory(d.bids);
+    } catch {}
+  }
+
+  function renderBidHistory(bids) {
+    if (!bidHistoryList) return;
+    if (!bids.length) return;
+
+    // Clear static placeholder bids
+    bidHistoryList.innerHTML = '';
+
+    bids.forEach((b, i) => {
+      const div = document.createElement('div');
+      div.className = 'bid-item' + (i === 0 ? ' winning' : '');
+      div.innerHTML = `
+        <div class="bid-item-left">
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${b.bidder}" alt="Bidder" style="width:2rem;height:2rem;border-radius:50%;" />
+          <div>
+            <p class="bid-item-name">@${b.bidder}</p>
+            <p class="bid-item-status">${i === 0 ? 'Winning' : 'Outbid'}</p>
+          </div>
+        </div>
+        <div class="bid-item-right">
+          <p class="bid-item-amount">${fmtINR(b.amount)}</p>
+          <p class="bid-item-time">${timeAgo(b.created_at)}</p>
+        </div>`;
+      bidHistoryList.appendChild(div);
+    });
+  }
+
+  function prependBid(bidder, amountPaise, isoTime) {
+    if (!bidHistoryList) return;
+
+    // Mark all existing winning bids as outbid
+    bidHistoryList.querySelectorAll('.bid-item.winning').forEach(el => {
+      el.classList.remove('winning');
+      const status = el.querySelector('.bid-item-status');
+      if (status) status.textContent = 'Outbid';
+    });
+
+    const div = document.createElement('div');
+    div.className = 'bid-item winning';
+    div.style.animation = 'fadeInDown 0.4s ease';
+    div.innerHTML = `
+      <div class="bid-item-left">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${bidder}" alt="Bidder" style="width:2rem;height:2rem;border-radius:50%;" />
+        <div>
+          <p class="bid-item-name">@${bidder}</p>
+          <p class="bid-item-status">Winning</p>
+        </div>
+      </div>
+      <div class="bid-item-right">
+        <p class="bid-item-amount">${fmtINR(amountPaise)}</p>
+        <p class="bid-item-time">Just now</p>
+      </div>`;
+    bidHistoryList.insertBefore(div, bidHistoryList.firstChild);
+  }
+
+  function addTicker(bidder, amountPaise, itemName) {
+    if (!tickerScroll) return;
+    const item = document.createElement('div');
+    item.className = 'ticker-item';
+    item.innerHTML = `<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${bidder}" alt="User" style="width:1.5rem;height:1.5rem;border-radius:50%;" />
+      <span><strong>@${bidder}</strong> bid ${fmtINR(amountPaise)} on <em>${itemName || 'this item'}</em></span>`;
+    tickerScroll.appendChild(item);
+    // Remove oldest if too many
+    const items = tickerScroll.querySelectorAll('.ticker-item');
+    if (items.length > 10) items[0].remove();
+  }
+
+  // ── Socket.IO ─────────────────────────────────────────────────
+  function connectSocket() {
+    const socket = io({ withCredentials: true, transports: ['websocket', 'polling'] });
+
+    socket.on('connect', function () {
+      console.log('[WS] Connected:', socket.id);
+      socket.emit('join_auction', { auction_id: AUCTION_ID });
+    });
+
+    socket.on('disconnect', function () {
+      console.log('[WS] Disconnected');
+    });
+
+    socket.on('connect_error', function (err) {
+      console.warn('[WS] Connection error:', err.message);
+    });
+
+    // ── Auction initial state ─────────────────────────────────
+    socket.on('auction_state', function (data) {
+      if (data.auction) applyAuctionState(data.auction);
+      if (data.viewer_count && viewerCountEl) {
+        viewerCountEl.textContent = data.viewer_count + ' Viewing';
+      }
+    });
+
+    // ── New bid ───────────────────────────────────────────────
+    socket.on('bid_update', function (data) {
+      if (data.auction_id !== AUCTION_ID) return;
+
+      currentBidPaise = data.current_bid;
+
+      // Update current bid display
+      if (currentBidDisplay) {
+        currentBidDisplay.textContent = fmtINR(currentBidPaise);
+        currentBidDisplay.style.transition = 'color 0.3s';
+        currentBidDisplay.style.color = '#c899ff';
+        setTimeout(() => currentBidDisplay.style.color = '', 800);
+      }
+
+      // Update minimum bid input
+      const minNext = currentBidPaise + 100 * 100;
+      if (bidInput) {
+        bidInput.value = Math.ceil(minNext / 100);
+        bidInput.min   = Math.ceil(minNext / 100);
+      }
+      if (minBidNote) {
+        const span = minBidNote.querySelector('span');
+        if (span) span.textContent = fmtINR(minNext);
+      }
+
+      // Update bid count badge
+      const badge = document.getElementById('bidCountBadge');
+      if (badge && data.bid_count) {
+        badge.textContent = data.bid_count + ' Bid' + (data.bid_count !== 1 ? 's' : '');
+      }
+
+      // Prepend to bid history
+      prependBid(data.bidder, data.current_bid, data.timestamp);
+
+      // Add to live ticker
+      const titleEl = document.querySelector('.product-title');
+      addTicker(data.bidder, data.current_bid, titleEl ? titleEl.textContent : '');
+
+      // Flash bid-pulse
+      const bidCard = document.querySelector('.bid-panel, .bid-card');
+      if (bidCard) {
+        bidCard.classList.add('bid-pulse');
+        setTimeout(() => bidCard.classList.remove('bid-pulse'), 1000);
+      }
+
+      // ── Live bid toast notification for ALL users ──
+      showBidToast(data.bidder, data.current_bid_inr);
+    });
+
+    // ── Timer countdown ───────────────────────────────────────
+    socket.on('timer_update', function (data) {
+      if (data.auction_id !== AUCTION_ID) return;
+      const s = data.seconds_left;
+      if (auctionTimerEl) {
+        auctionTimerEl.textContent = fmtTime(s);
+        // Turn red when < 5 minutes
+        auctionTimerEl.style.color = s < 300 ? '#ff6e84' : '';
+      }
+      if (timerBarEl && timerMax > 0) {
+        timerBarEl.style.width = Math.min(100, (s / timerMax) * 100) + '%';
+      }
+    });
+
+    // ── Viewer count ──────────────────────────────────────────
+    socket.on('viewer_count', function (data) {
+      if (data.auction_id !== AUCTION_ID) return;
+      if (viewerCountEl) viewerCountEl.textContent = data.count + ' Viewing';
+    });
+
+    // ── Auction ended ─────────────────────────────────────────
+    socket.on('auction_ended', function (data) {
+      if (data.auction_id !== AUCTION_ID) return;
+      auctionEnded = true;
+
+      if (auctionTimerEl) {
+        auctionTimerEl.textContent = 'ENDED';
+        auctionTimerEl.style.color = '#ff6e84';
+      }
+      if (timerBarEl) timerBarEl.style.width = '0%';
+      if (placeBidBtn) {
+        if (data.order_id && currentUser && data.winner === currentUser.username) {
+            placeBidBtn.disabled = false;
+            placeBidBtn.textContent = 'Complete Order';
+            placeBidBtn.style.opacity = '1';
+            placeBidBtn.onclick = () => window.location.href = '/order/' + data.order_id;
+        } else {
+            placeBidBtn.disabled = true;
+            placeBidBtn.textContent = 'Auction Ended';
+            placeBidBtn.style.opacity = '0.5';
+        }
+      }
+
+      // Show winner banner
+      const winner = data.winner || 'No winner';
+      const banner = document.createElement('div');
+      banner.style.cssText = `
+        position:fixed;top:5rem;left:50%;transform:translateX(-50%);
+        background:linear-gradient(135deg,#1e0a3c,#2d0055);
+        border:2px solid #c899ff;
+        color:#fff;padding:1.5rem 2.5rem;border-radius:1.25rem;font-weight:700;
+        z-index:1000;text-align:center;box-shadow:0 8px 40px rgba(200,153,255,0.5);
+        font-family:var(--font-headline);min-width:320px;`;
+
+      const isWinner = currentUser && data.winner === currentUser.username;
+      if (isWinner && data.order_id) {
+        banner.innerHTML = `
+          <div style="font-size:2rem;margin-bottom:.5rem;">🏆</div>
+          <div style="font-size:1.1rem;margin-bottom:.25rem;">You Won!</div>
+          <div style="color:#c899ff;font-size:1.4rem;font-weight:900;margin-bottom:1rem;">${data.final_bid_inr}</div>
+          <a href="/order/${data.order_id}" style="display:inline-block;background:#c899ff;color:#1a0040;
+            padding:.75rem 2rem;border-radius:.75rem;font-weight:800;text-decoration:none;font-size:1rem;">
+            📦 Complete Your Order →
+          </a>`;
+      } else {
+        banner.innerHTML = `
+          <div style="font-size:1.5rem;margin-bottom:.25rem;">🏁 Auction Ended!</div>
+          <div style="color:#c899ff;">Winner: @${winner} · ${data.final_bid_inr}</div>`;
+      }
+      document.body.appendChild(banner);
+      // Remove after 30 sec (give winner time to click)
+      setTimeout(() => banner.style.opacity = '0', 25000);
+      setTimeout(() => banner.remove(), 30000);
+    });
+
+    // ── Bid response handlers ─────────────────────────────────
+    socket.on('bid_error', function (data) {
+      showBidMsg(data.message, true);
+      if (placeBidBtn && !auctionEnded) {
+        clearTimeout(placeBidBtn._safetyTimer);
+        placeBidBtn.disabled    = false;
+        placeBidBtn.textContent = 'Place Bid';
+      }
+    });
+    socket.on('bid_success', function (data) {
+      showBidMsg('✅ ' + data.message, false);
+      if (placeBidBtn && !auctionEnded) {
+        clearTimeout(placeBidBtn._safetyTimer);
+        placeBidBtn.disabled    = false;
+        placeBidBtn.textContent = 'Place Bid';
+      }
+      if (data.new_balance !== undefined) {
+        const walletEl = document.getElementById('walletBalanceAuction');
+        if (walletEl) walletEl.textContent = fmtINR(data.new_balance);
+      }
+    });
+
+    // ── Cleanup on page leave ─────────────────────────────────
+    window.addEventListener('beforeunload', function () {
+      socket.emit('leave_auction', { auction_id: AUCTION_ID });
+    });
+
+    // Store socket reference for use by bid button
+    window._auctionSocket = socket;
+
+    // ── Watchlist / Favourite button ─────────────────────────────
+    const favBtn = document.querySelector('.product-action-btn.fav');
+    if (favBtn) {
+      // Check status
+      async function refreshFavBtn() {
+        if (!AUCTION_ID) return;
+        try {
+          const r = await fetch('/api/watchlist/' + AUCTION_ID + '/status', { credentials: 'include' });
+          const d = await r.json();
+          const icon = favBtn.querySelector('.material-symbols-outlined');
+          if (icon) {
+            icon.textContent = d.watching ? 'favorite' : 'favorite_border';
+            icon.style.color = d.watching ? 'var(--error)' : '';
+          }
+          favBtn._watching = d.watching;
+        } catch (_) {}
+      }
+      refreshFavBtn();
+
+      favBtn.addEventListener('click', async function () {
+        if (!AUCTION_ID) return;
+        const watching = favBtn._watching;
+        const method   = watching ? 'DELETE' : 'POST';
+        try {
+          const r = await fetch('/api/watchlist/' + AUCTION_ID, { method, credentials: 'include' });
+          if (r.ok) {
+            favBtn._watching = !watching;
+            const icon = favBtn.querySelector('.material-symbols-outlined');
+            if (icon) {
+              icon.textContent = !watching ? 'favorite' : 'favorite_border';
+              icon.style.color = !watching ? 'var(--error)' : '';
+            }
+          }
+        } catch (_) {}
+      });
+    }
+  }
+
+  function showBidMsg(msg, isError) {
+    let el = document.getElementById('bidMsg');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'bidMsg';
+      el.style.cssText = 'margin-top:0.75rem;padding:0.6rem 1rem;border-radius:0.5rem;font-size:0.85rem;font-weight:600;';
+      if (placeBidBtn) placeBidBtn.parentNode.insertBefore(el, placeBidBtn.nextSibling);
+    }
+    el.textContent = msg;
+    el.style.background = isError ? 'rgba(255,110,132,0.15)' : 'rgba(0,227,253,0.15)';
+    el.style.color       = isError ? '#ff6e84' : '#00e3fd';
+    el.style.border      = isError ? '1px solid rgba(255,110,132,0.3)' : '1px solid rgba(0,227,253,0.3)';
+    el.style.display     = 'block';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+
+  // ── Live bid toast: shown to EVERY user when someone places a bid ──────────
+  var _toastQueue = [];
+  var _toastShowing = false;
+
+  function showBidToast(bidder, amountStr) {
+    _toastQueue.push({ bidder: bidder, amountStr: amountStr });
+    if (!_toastShowing) _nextToast();
+  }
+
+  function _nextToast() {
+    if (!_toastQueue.length) { _toastShowing = false; return; }
+    _toastShowing = true;
+    var item = _toastQueue.shift();
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:6rem;right:1.5rem;z-index:9998;' +
+      'background:linear-gradient(135deg,#1e0a3c,#2d0055);border:1px solid #c899ff;' +
+      'border-radius:1rem;padding:1rem 1.25rem;box-shadow:0 8px 32px rgba(200,153,255,0.35);' +
+      'font-family:var(--font-headline);display:flex;align-items:center;gap:.75rem;' +
+      'min-width:260px;max-width:320px;animation:slideInRight .3s ease;transition:opacity .3s;';
+    t.innerHTML = '<div style="font-size:1.75rem;line-height:1;">&#9889;</div>' +
+      '<div><div style="font-weight:700;font-size:.95rem;color:#fff;">New Bid!</div>' +
+      '<div style="font-size:.82rem;color:#c899ff;margin-top:.15rem;">' +
+      '<strong>@' + item.bidder + '</strong> bid <strong>' + item.amountStr + '</strong></div></div>';
+    document.body.appendChild(t);
+    setTimeout(function() {
+      t.style.opacity = '0';
+      setTimeout(function() { t.remove(); _nextToast(); }, 350);
+    }, 2800);
+  }
+
+  // Add animation CSS
+  if (!document.getElementById('toastCSS')) {
+    var ts = document.createElement('style');
+    ts.id = 'toastCSS';
+    ts.textContent = '@keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}';
+    document.head.appendChild(ts);
+  }
+
+
+  // ── Boot ──────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', init);
+  // If DOMContentLoaded already fired (script at bottom of body):
+  if (document.readyState !== 'loading') init();
+
+})();
+</script>
+</body>
+</html>
