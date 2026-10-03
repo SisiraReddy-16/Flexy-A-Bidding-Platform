@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexy – Verify Email</title>
+  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/login.css" />
+  <style>
+    .verify-card { max-width:440px;width:100%;padding:2.5rem;text-align:center;background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:1.5rem;margin:0 1rem; }
+    .verify-icon { width:5rem;height:5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem; }
+    .verify-icon.loading { background:rgba(200,153,255,.15);animation:pulse 1.5s infinite; }
+    .verify-icon.success { background:rgba(74,222,128,.15); }
+    .verify-icon.error   { background:rgba(255,110,132,.15); }
+    .verify-icon.otp     { background:rgba(200,153,255,.15); }
+    @keyframes pulse { 0%,100%{opacity:1;}50%{opacity:.5;} }
+    .verify-btn { display:inline-block;background:var(--primary);color:var(--on-primary-container);padding:.75rem 2rem;border-radius:.75rem;font-family:var(--font-headline);font-weight:700;text-decoration:none;margin-top:1.5rem;border:none;cursor:pointer;font-size:1rem;transition:.2s; }
+    .verify-btn:hover { filter:brightness(1.1); }
+    .verify-btn.outline { background:transparent;border:1px solid var(--outline-variant);color:var(--on-surface-variant); }
+    .otp-container { display:flex;gap:.75rem;justify-content:center;margin:1.5rem 0; }
+    .otp-input {
+      width:3rem;height:3.5rem;text-align:center;font-size:1.5rem;font-weight:700;
+      background:var(--surface-container-high);border:2px solid var(--outline-variant);
+      border-radius:.75rem;color:var(--on-surface);caret-color:var(--primary);
+      outline:none;transition:border-color .2s;font-family:'Courier New',monospace;
+    }
+    .otp-input:focus { border-color:var(--primary); }
+    .otp-input.filled { border-color:var(--primary);background:rgba(200,153,255,.1); }
+    .email-display { font-size:.9rem;color:var(--on-surface-variant);margin-bottom:1rem;word-break:break-all; }
+    .email-display strong { color:var(--primary); }
+    #errorMsg { color:#ff6e84;font-size:.85rem;margin:.5rem 0;min-height:1.2em; }
+    #resendTimer { font-size:.82rem;color:var(--on-surface-variant);margin-top:1rem; }
+    .resend-link { color:var(--primary);cursor:pointer;text-decoration:underline;background:none;border:none;font-size:.82rem;padding:0; }
+  </style>
+</head>
+<body style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--background);">
+  <div class="verify-card">
+    <a href="/login" class="brand-logo" style="display:inline-block;margin-bottom:2rem;font-size:1.75rem;">Flexy</a>
+
+    <div class="verify-icon loading" id="statusIcon">
+      <span class="material-symbols-outlined" style="font-size:2rem;color:var(--primary);">hourglass_top</span>
+    </div>
+
+    <h2 id="statusTitle" style="font-family:var(--font-headline);font-size:1.5rem;margin-bottom:.75rem;">Verifying…</h2>
+    <p id="statusMsg" style="color:var(--on-surface-variant);line-height:1.6;margin-bottom:.5rem;">Please wait…</p>
+
+    <div id="otpSection" style="display:none;">
+      <p class="email-display">Enter the 6-digit code sent to<br><strong id="emailDisplay"></strong></p>
+      <div class="otp-container" id="otpContainer">
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o0" />
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o1" />
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o2" />
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o3" />
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o4" />
+        <input class="otp-input" type="text" inputmode="numeric" maxlength="1" id="o5" />
+      </div>
+      <p id="errorMsg"></p>
+      <button class="verify-btn" id="verifyOtpBtn" style="width:100%;margin-top:.5rem;" onclick="submitOtp()">Verify OTP</button>
+      <p id="resendTimer"></p>
+    </div>
+
+    <div id="actionBtns" style="display:flex;flex-direction:column;gap:.75rem;align-items:center;margin-top:1.5rem;"></div>
+  </div>
+
+<script>
+(async function () {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+  const email  = params.get('email');
+
+  const icon   = document.getElementById('statusIcon');
+  const title  = document.getElementById('statusTitle');
+  const msg    = document.getElementById('statusMsg');
+  const btns   = document.getElementById('actionBtns');
+
+  function setSuccess(message, redirectTo) {
+    icon.className = 'verify-icon success';
+    icon.innerHTML = '<span class="material-symbols-outlined" style="font-size:2rem;color:#4ade80;">verified</span>';
+    title.textContent = 'Email Verified!';
+    msg.textContent   = message;
+    document.getElementById('otpSection').style.display = 'none';
+    const dest = redirectTo || '/login';
+    btns.innerHTML = '<a href="' + dest + '" class="verify-btn">Continue \u2192</a><p style="font-size:.8rem;color:var(--on-surface-variant);margin-top:.5rem;">Redirecting in <span id="countdown">5</span>s</p>';
+    let count = 5;
+    const iv = setInterval(() => {
+      count--;
+      const el = document.getElementById('countdown');
+      if (el) el.textContent = count;
+      if (count <= 0) { clearInterval(iv); window.location.href = dest; }
+    }, 1000);
+  }
+
+  function setError(message, showResend, resendEmail) {
+    icon.className = 'verify-icon error';
+    icon.innerHTML = '<span class="material-symbols-outlined" style="font-size:2rem;color:#ff6e84;">error</span>';
+    title.textContent = 'Verification Failed';
+    msg.textContent   = message;
+    document.getElementById('otpSection').style.display = 'none';
+    btns.innerHTML = '<a href="/login" class="verify-btn outline">\u2190 Back to Login</a>';
+    if (showResend && resendEmail) {
+      btns.insertAdjacentHTML('afterbegin',
+        '<button id="resendBtn" class="verify-btn" onclick="doResend(\'' + encodeURIComponent(resendEmail) + '\')">Resend OTP</button>');
+    }
+  }
+
+  function showOtpError(text) { document.getElementById('errorMsg').textContent = text; }
+  function clearError()       { document.getElementById('errorMsg').textContent = ''; }
+
+  function startResendTimer(emailAddr) {
+    const timerEl = document.getElementById('resendTimer');
+    if (!timerEl) return;
+    let secs = 60;
+    timerEl.innerHTML = "Didn't receive it? Resend in <strong>" + secs + "s</strong>";
+    const iv = setInterval(() => {
+      secs--;
+      if (secs <= 0) {
+        clearInterval(iv);
+        timerEl.innerHTML = "Didn't receive it? <button class=\"resend-link\" onclick=\"doResend('" + encodeURIComponent(emailAddr) + "')\">Resend OTP</button>";
+      } else {
+        timerEl.innerHTML = "Didn't receive it? Resend in <strong>" + secs + "s</strong>";
+      }
+    }, 1000);
+  }
+
+  window.doResend = async function(encodedEmail) {
+    const emailAddr = decodeURIComponent(encodedEmail);
+    const timerEl = document.getElementById('resendTimer');
+    if (timerEl) timerEl.textContent = 'Sending…';
+    const btn = document.getElementById('resendBtn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+    try {
+      const res  = await fetch('/api/auth/resend-verification', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: emailAddr }),
+      });
+      const data = await res.json();
+      if (btn) { btn.textContent = data.message || 'Sent!'; setTimeout(() => { if(btn) btn.remove(); }, 3000); }
+      if (timerEl) setTimeout(() => startResendTimer(emailAddr), 3000);
+    } catch {
+      if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+      if (timerEl) timerEl.textContent = 'Failed to send. Try again.';
+    }
+  };
+
+  window.submitOtp = async function() {
+    const otp = [0,1,2,3,4,5].map(i => document.getElementById('o'+i).value).join('');
+    if (otp.length < 6) { showOtpError('Please enter all 6 digits.'); return; }
+
+    const btn = document.getElementById('verifyOtpBtn');
+    btn.disabled = true; btn.textContent = 'Verifying…';
+
+    try {
+      const emailVal = decodeURIComponent(email);
+      const res  = await fetch('/api/auth/verify-otp', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: emailVal, otp: otp }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess(data.message || 'Email verified! You are now logged in.', '/dashboard');
+      } else if (data.expired) {
+        icon.className = 'verify-icon error';
+        icon.innerHTML = '<span class="material-symbols-outlined" style="font-size:2rem;color:#ff6e84;">timer_off</span>';
+        title.textContent = 'OTP Expired';
+        msg.textContent   = 'Your OTP has expired. Request a new one.';
+        document.getElementById('otpSection').style.display = 'none';
+        btns.innerHTML = '<button id="resendBtn" class="verify-btn" onclick="doResend(\'' + encodeURIComponent(decodeURIComponent(email)) + '\')">Resend OTP</button><a href="/login" class="verify-btn outline">\u2190 Back to Login</a>';
+      } else {
+        showOtpError(data.error || 'Invalid OTP. Please try again.');
+        btn.disabled = false; btn.textContent = 'Verify OTP';
+      }
+    } catch {
+      showOtpError('Connection error. Please try again.');
+      btn.disabled = false; btn.textContent = 'Verify OTP';
+    }
+  };
+
+  // ── OTP flow: signup redirects to /verify-email?email=... ────────────────
+  if (email) {
+    icon.className = 'verify-icon otp';
+    icon.innerHTML = '<span class="material-symbols-outlined" style="font-size:2rem;color:var(--primary);">mark_email_unread</span>';
+    title.textContent = 'Check Your Email';
+    msg.textContent   = 'We sent a 6-digit OTP to your email address. It expires in 10 minutes.';
+
+    document.getElementById('emailDisplay').textContent = decodeURIComponent(email);
+    document.getElementById('otpSection').style.display = 'block';
+
+    const inputs = [0,1,2,3,4,5].map(i => document.getElementById('o'+i));
+    inputs.forEach((inp, idx) => {
+      inp.addEventListener('input', e => {
+        const val = e.target.value.replace(/\D/g, '');
+        e.target.value = val ? val[0] : '';
+        if (val) inp.classList.add('filled'); else inp.classList.remove('filled');
+        if (val && idx < 5) inputs[idx+1].focus();
+        clearError();
+      });
+      inp.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !inp.value && idx > 0) {
+          inputs[idx-1].focus();
+          inputs[idx-1].value = '';
+          inputs[idx-1].classList.remove('filled');
+        }
+        if (e.key === 'Enter') window.submitOtp();
+      });
+      inp.addEventListener('paste', e => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+        pasted.split('').forEach((ch, i) => {
+          if (inputs[i]) { inputs[i].value = ch; inputs[i].classList.add('filled'); }
+        });
+        if (pasted.length > 0) inputs[Math.min(pasted.length, 5)].focus();
+        clearError();
+      });
+    });
+
+    startResendTimer(decodeURIComponent(email));
+    inputs[0].focus();
+    return;
+  }
+
+  // ── Link-based flow: /verify-email?token=... ─────────────────────────────
+  if (!token) {
+    setError('No verification token or email was found in the URL. Please sign up again.');
+    return;
+  }
+
+  try {
+    const res  = await fetch('/api/auth/verify-email?token=' + encodeURIComponent(token));
+    const data = await res.json();
+    if (res.ok) {
+      setSuccess(data.message || 'Your email has been verified!', '/login');
+    } else if (data.expired) {
+      setError('This verification link has expired. Request a new one below.', true, data.email || '');
+    } else {
+      setError(data.error || 'The link may have already been used or is invalid.');
+    }
+  } catch {
+    icon.className = 'verify-icon error';
+    icon.innerHTML = '<span class="material-symbols-outlined" style="font-size:2rem;color:#fbbf24;">wifi_off</span>';
+    title.textContent = 'Connection Error';
+    msg.textContent   = 'Could not reach the server. Please check your connection.';
+    btns.innerHTML = '<button class="verify-btn" onclick="location.reload()">Try Again</button>';
+  }
+})();
+</script>
+</body>
+</html>

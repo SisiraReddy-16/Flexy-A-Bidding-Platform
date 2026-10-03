@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexy | Settings & Security</title>  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+  <link rel="stylesheet" href="/static/css/wallet.css" />
+  <style>
+    .settings-wrap { max-width:52rem;margin:0 auto; }
+    .settings-section { background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:1rem;padding:1.75rem;margin-bottom:1.5rem; }
+    .settings-section-title { font-size:1rem;font-weight:700;color:#fff;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem; }
+    .settings-section-title .material-symbols-outlined { color:var(--primary);font-size:1.25rem; }
+    .form-row { display:flex;flex-direction:column;gap:1rem; }
+    @media(min-width:640px){ .form-row { flex-direction:row; } .form-row > * { flex:1; } }
+    .field-label { display:block;margin-bottom:.4rem;color:var(--on-surface-variant);font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;font-weight:600; }
+    .field-input { width:100%;padding:.7rem 1rem;border-radius:.5rem;background:rgba(0,0,0,.4);border:1px solid var(--outline-variant);color:#fff;outline:none;font-family:var(--font-body);font-size:.9rem;box-sizing:border-box; }
+    .field-input:focus { border-color:var(--primary);box-shadow:0 0 0 2px rgba(200,153,255,.15); }
+    textarea.field-input { resize:vertical;min-height:80px; }
+    .btn-primary { background:var(--primary);color:var(--on-primary-container);font-weight:700;border:none;padding:.7rem 1.5rem;border-radius:.5rem;cursor:pointer;transition:.2s;font-family:var(--font-headline);font-size:.875rem; }
+    .btn-primary:hover { filter:brightness(1.1); }
+    .btn-primary:disabled { opacity:.5;cursor:not-allowed; }
+    .btn-danger { background:rgba(255,110,132,.15);color:var(--error);border:1px solid rgba(255,110,132,.3);font-weight:700;padding:.6rem 1.25rem;border-radius:.5rem;cursor:pointer;transition:.2s;font-family:var(--font-headline);font-size:.875rem; }
+    .btn-danger:hover { background:rgba(255,110,132,.25); }
+    .status-msg { font-size:.85rem;padding:.5rem .75rem;border-radius:.4rem;margin-top:.75rem;display:none; }
+    .status-msg.ok  { background:rgba(0,227,253,.1);color:var(--secondary);border:1px solid rgba(0,227,253,.2); }
+    .status-msg.err { background:rgba(255,110,132,.1);color:var(--error);border:1px solid rgba(255,110,132,.2); }
+    .mfa-badge { display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:700; }
+    .mfa-badge.on  { background:rgba(74,222,128,.15);color:#4ade80; }
+    .mfa-badge.off { background:rgba(255,110,132,.15);color:var(--error); }
+    .qr-wrap { text-align:center;padding:1.5rem;background:rgba(0,0,0,.3);border-radius:.75rem;border:1px solid var(--outline-variant);margin:1rem 0; }
+    .qr-wrap img { max-width:200px;border-radius:.5rem;border:4px solid #fff; }
+    .session-item { display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:var(--surface-container-high);border-radius:.5rem;margin-bottom:.5rem; }
+    .session-current { font-size:.7rem;background:rgba(200,153,255,.15);color:var(--primary);border-radius:9999px;padding:.15rem .5rem;font-weight:700; }
+    .pw-rules-inline { display:flex;flex-wrap:wrap;gap:.3rem .6rem;margin-top:.4rem; }
+    .pw-rule-s { font-size:.72rem;display:flex;align-items:center;gap:.2rem;color:var(--on-surface-variant); }
+    .pw-rule-s.ok { color:#4ade80; }
+    .pw-rule-s .material-symbols-outlined { font-size:.8rem; }
+    .notif-badge-wrap{position:relative;display:inline-flex;}
+    .notif-badge{position:absolute;top:-.2rem;right:-.2rem;background:var(--error);color:#fff;font-size:.6rem;font-weight:800;min-width:1rem;height:1rem;border-radius:9999px;display:none;align-items:center;justify-content:center;padding:0 .2rem;}
+  </style>
+</head>
+<body class="dashboard-body">
+
+  <!-- Top Nav -->
+  <header class="top-nav"><div class="top-nav-inner">
+    <div style="display:flex;align-items:center;gap:3rem;">
+      <a href="/dashboard" class="brand-logo">Flexy</a>
+      <div class="top-nav-links"><a href="/dashboard">Explore</a><a href="/auction">Live</a><a href="/wallet">Wallet</a></div>
+    </div>
+    <div class="top-nav-right">
+      <a href="/notifications" class="nav-icon-btn notif-badge-wrap" style="text-decoration:none;"><span class="material-symbols-outlined">notifications</span><span class="notif-badge">0</span></a>
+      <button class="nav-icon-btn" onclick="window.location.href='/wallet'"><span class="material-symbols-outlined">account_balance_wallet</span></button>
+      <div class="nav-avatar" style="cursor:pointer;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User" /></div>
+    </div>
+  </div></header>
+
+  <!-- Side Nav -->
+  <aside class="side-nav">
+    <div class="side-nav-brand"><h2>Flexy Beta</h2><p>High-Velocity Bidding</p></div>
+    <nav class="side-nav-links">
+      <a href="/dashboard"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a>
+      <a href="/auction"><span class="material-symbols-outlined">bolt</span><span>Live Auctions</span></a>
+      <a href="/create"><span class="material-symbols-outlined">add_circle</span><span>Create Auction</span></a>
+      <a href="/watchlist"><span class="material-symbols-outlined">favorite</span><span>Wishlist</span></a>
+      <a href="/my-orders"><span class="material-symbols-outlined">package_2</span><span>My Orders</span></a>
+      <a href="/wallet"><span class="material-symbols-outlined">account_balance_wallet</span><span>Wallet</span></a>
+    </nav>
+    <div class="side-nav-bottom"><nav class="side-nav-links">
+      <a href="/settings" class="active"><span class="material-symbols-outlined filled">settings</span><span>Settings</span></a>
+      <a href="/login"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+    </nav></div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-with-sidebar" style="padding-bottom:5rem;">
+    <div class="settings-wrap">
+      <h2 style="font-size:1.75rem;font-weight:800;margin-bottom:1.75rem;">⚙️ Settings &amp; Security</h2>
+
+      <!-- ── 1. Profile ── -->
+      <div class="settings-section">
+        <p class="settings-section-title"><span class="material-symbols-outlined">person</span> Profile Information</p>
+        <form id="profileForm">
+          <div class="form-row" style="margin-bottom:1rem;">
+            <div>
+              <label class="field-label">Avatar URL</label>
+              <input type="text" id="avatar_url" class="field-input" placeholder="https://…" />
+            </div>
+            <div>
+              <label class="field-label">Location</label>
+              <input type="text" id="location" class="field-input" placeholder="Mumbai, IN" />
+            </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="field-label">Bio (max 300 chars)</label>
+            <textarea id="bio" class="field-input" placeholder="Tell the community about yourself…"></textarea>
+          </div>
+          <button type="submit" class="btn-primary">Save Profile</button>
+          <div class="status-msg" id="profileMsg"></div>
+        </form>
+      </div>
+
+      <!-- ── 2. Change Password ── -->
+      <div class="settings-section">
+        <p class="settings-section-title"><span class="material-symbols-outlined">lock_reset</span> Change Password</p>
+        <form id="changePassForm">
+          <div style="margin-bottom:1rem;">
+            <label class="field-label">Current Password</label>
+            <div style="position:relative;">
+              <input type="password" id="currentPass" class="field-input" placeholder="Your current password" autocomplete="current-password" />
+            </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="field-label">New Password</label>
+            <div style="position:relative;">
+              <input type="password" id="newPass" class="field-input" placeholder="Min 8 chars, upper, lower, number" autocomplete="new-password" />
+            </div>
+            <div class="pw-rules-inline" id="cpwRules">
+              <span class="pw-rule-s" id="cpw-len"><span class="material-symbols-outlined">close</span>8+ chars</span>
+              <span class="pw-rule-s" id="cpw-upper"><span class="material-symbols-outlined">close</span>Uppercase</span>
+              <span class="pw-rule-s" id="cpw-lower"><span class="material-symbols-outlined">close</span>Lowercase</span>
+              <span class="pw-rule-s" id="cpw-digit"><span class="material-symbols-outlined">close</span>Number</span>
+            </div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <label class="field-label">Confirm New Password</label>
+            <input type="password" id="confirmNewPass" class="field-input" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+          <button type="submit" class="btn-primary" id="changePwBtn">Change Password</button>
+          <div class="status-msg" id="changePassMsg"></div>
+        </form>
+      </div>
+
+      <!-- ── 3. Two-Factor Authentication ── -->
+      <div class="settings-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+          <p class="settings-section-title" style="margin-bottom:0;"><span class="material-symbols-outlined">phonelink_lock</span> Two-Factor Authentication</p>
+          <span class="mfa-badge off" id="mfaBadge"><span class="material-symbols-outlined" style="font-size:.875rem;">lock_open</span> Disabled</span>
+        </div>
+        <p style="color:var(--on-surface-variant);font-size:.875rem;margin-bottom:1rem;">Protect your account with a one-time code from your authenticator app (Google Authenticator, Authy, etc.).</p>
+
+        <!-- MFA OFF state -->
+        <div id="mfaSetupSection">
+          <button class="btn-primary" id="setupMfaBtn">Enable Two-Factor Auth</button>
+          <!-- QR code appears here after clicking Enable -->
+          <div id="mfaQrSection" style="display:none;">
+            <div class="qr-wrap">
+              <p style="font-size:.85rem;color:var(--on-surface-variant);margin-bottom:1rem;">Scan this QR code with your authenticator app, then enter the 6-digit code to confirm.</p>
+              <img id="mfaQr" src="" alt="QR Code" />
+              <p style="font-size:.75rem;color:var(--on-surface-variant);margin-top:.75rem;">Or enter manually: <code id="mfaSecret" style="color:var(--primary);font-size:.8rem;word-break:break-all;"></code></p>
+            </div>
+            <div style="display:flex;gap:.75rem;align-items:flex-end;">
+              <div style="flex:1;">
+                <label class="field-label">Verification Code</label>
+                <input type="text" id="mfaCodeInput" class="field-input" placeholder="123456" maxlength="6" style="letter-spacing:.2em;font-size:1.1rem;" />
+              </div>
+              <button type="button" class="btn-primary" id="confirmMfaBtn" style="height:42px;white-space:nowrap;">Confirm &amp; Enable</button>
+            </div>
+            <div class="status-msg" id="mfaSetupMsg"></div>
+          </div>
+        </div>
+
+        <!-- MFA ON state -->
+        <div id="mfaDisableSection" style="display:none;">
+          <p style="color:#4ade80;font-size:.875rem;margin-bottom:1rem;">✅ Two-factor authentication is active. Your account has extra protection.</p>
+          <div style="display:flex;gap:.75rem;align-items:flex-end;">
+            <div style="flex:1;">
+              <label class="field-label">Enter OTP to Disable</label>
+              <input type="text" id="disableMfaCode" class="field-input" placeholder="6-digit code" maxlength="6" style="letter-spacing:.2em;" />
+            </div>
+            <button type="button" class="btn-danger" id="disableMfaBtn" style="height:42px;white-space:nowrap;">Disable 2FA</button>
+          </div>
+          <div class="status-msg" id="mfaDisableMsg"></div>
+        </div>
+      </div>
+
+      <!-- ── 4. Active Sessions ── -->
+      <div class="settings-section">
+        <p class="settings-section-title"><span class="material-symbols-outlined">devices</span> Active Sessions</p>
+        <p style="color:var(--on-surface-variant);font-size:.875rem;margin-bottom:1rem;">These devices are currently signed in to your account. Revoke any session you don't recognise.</p>
+        <div id="sessionsList"><p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p></div>
+      </div>
+
+      <!-- ── 5. Account Info ── -->
+      <div class="settings-section">
+        <p class="settings-section-title"><span class="material-symbols-outlined">info</span> Account Information</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Email</p><p id="infoEmail" style="font-weight:600;font-size:.9rem;">—</p></div>
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Username</p><p id="infoUsername" style="font-weight:600;font-size:.9rem;">—</p></div>
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Member Since</p><p id="infoJoined" style="font-weight:600;font-size:.9rem;">—</p></div>
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Last Login</p><p id="infoLastLogin" style="font-weight:600;font-size:.9rem;">—</p></div>
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Email Verified</p><p id="infoVerified" style="font-weight:600;font-size:.9rem;">—</p></div>
+          <div><p style="color:var(--on-surface-variant);font-size:.8rem;">Account Role</p><p id="infoRole" style="font-weight:600;font-size:.9rem;">—</p></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="/dashboard"><span class="material-symbols-outlined">home</span><span>Home</span></a>
+    <a href="/auction"><span class="material-symbols-outlined">sensors</span><span>Live</span></a>
+    <a href="/wallet"><span class="material-symbols-outlined">payments</span><span>Wallet</span></a>
+    <a href="/settings" class="active"><span class="material-symbols-outlined filled">settings</span><span>Settings</span></a>
+  </nav>
+
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/settings.js" defer></script>
+</body>
+</html>

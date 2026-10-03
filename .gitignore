@@ -1,0 +1,24 @@
+# Environment variables
+.env
+backend/.env
+
+# Python cache
+target/
+*.pyc
+
+# Virtual environment
+venv/
+env/
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log

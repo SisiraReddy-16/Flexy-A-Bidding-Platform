@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <title>Flexy | Wallet &amp; Profile</title>
+  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/wallet.css" />
+</head>
+<body>
+
+  <!-- ══ Top Nav ══ -->
+  <header class="top-nav">
+    <div class="top-nav-inner">
+      <div style="display:flex;align-items:center;gap:3rem;">
+        <a href="/login" class="brand-logo">Flexy</a>
+        <div class="top-nav-links">
+          <a href="/dashboard">Explore</a>
+          <a href="/auction">Live</a>
+          <a href="/wallet" class="active">Wallets</a>
+        </div>
+      </div>
+      <div class="top-nav-right">
+        <button class="nav-icon-btn" style="color:var(--primary);">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button class="nav-icon-btn" style="color:var(--primary);">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </button>
+        <div class="nav-avatar">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtPzygkHFT2yuF3jHBlSSthxXFgA2jBszwcnCoC_d3r4iiKm53v-qgn74DHoDcXfyVkVz6moEIPCpX65Rgp7IkJVj4WzEkdf-ChngWmKfZHAKAELhKm9HrJxeEaiuLjrL9BLbAEpyZn3LgyTrrTJziFqJkdEC3YwTwQPxdbS8lMLLTgqxuzOg8j04we3Vwl7XxpjJ1xG3CDZHLQViFP5Aab99mbHF1nlGV6Lah-5FVN8jNWA-drUvCQYwgIMYVP6gaEvjbZDkz8Wzx" alt="User" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ Side Nav ══ -->
+  <aside class="side-nav">
+    <div class="side-nav-brand" style="padding-top:5rem;">
+      <h2>Flexy Beta</h2>
+      <p>High-Velocity Bidding</p>
+    </div>
+    <nav class="side-nav-links">
+      <a href="/dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/auction">
+        <span class="material-symbols-outlined">bolt</span>
+        <span>Live Auctions</span>
+      </a>
+      <a href="/create">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span>Create Auction</span>
+      </a>
+      <a href="/wallet" class="active">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span>Wallet</span>
+      </a>
+      <a href="/my-orders">
+        <span class="material-symbols-outlined">package_2</span>
+        <span>My Orders</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined">person</span>
+        <span>Profile</span>
+      </a>
+    </nav>
+    <div class="side-nav-cta">
+      <button onclick="window.location.href='/auction'">Start Bidding</button>
+    </div>
+    <div class="side-nav-bottom">
+      <nav class="side-nav-links">
+        <a href="/settings"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+        <a href="/login"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ══ Main Content ══ -->
+  <main class="main-with-sidebar" style="padding-bottom:5rem;">
+    <div style="max-width:72rem;margin:0 auto;display:flex;flex-direction:column;gap:2rem;">
+
+      <!-- ── Profile Section ── -->
+      <div class="profile-grid">
+
+        <!-- Identity card -->
+        <div class="identity-card">
+          <div class="avatar-wrap">
+            <img
+              id="profileAvatar"
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=julian"
+              alt="User"
+            />
+            <div class="verified-badge">
+              <span class="material-symbols-outlined filled" style="font-size:0.875rem;">verified</span>
+            </div>
+          </div>
+          <div class="identity-info">
+            <div class="identity-name-row">
+              <h1 class="identity-name" id="profileName">Username</h1>
+              <span class="identity-badge">Elite Collector</span>
+            </div>
+            <p class="identity-desc" id="profileBio">Loading bio...</p>
+            <div class="identity-meta">
+              <div class="identity-meta-item">
+                <span class="material-symbols-outlined" style="font-size:0.875rem;">calendar_today</span>
+                <span id="profileJoined">Joined Oct 2023</span>
+              </div>
+              <div class="identity-meta-item">
+                <span class="material-symbols-outlined" style="font-size:0.875rem;">location_on</span>
+                <span id="profileLocation">Unknown</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats bento -->
+        <div class="stats-bento">
+          <div class="stat-tile">
+            <span class="material-symbols-outlined">trophy</span>
+            <div>
+              <p class="tile-val" id="statsWins">0</p>
+              <p class="tile-label">Items Won</p>
+            </div>
+          </div>
+          <div class="stat-tile">
+            <span class="material-symbols-outlined">rocket_launch</span>
+            <div>
+              <p class="tile-val" id="statsActiveBids">0</p>
+              <p class="tile-label">Active Bids</p>
+            </div>
+          </div>
+          <div class="stat-valuation">
+            <div>
+              <p class="valuation-label">Total Valuation</p>
+              <p class="valuation-val" id="statsValuation">₹0</p>
+            </div>
+            <span class="material-symbols-outlined valuation-arrow">arrow_forward_ios</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Wallet + Transactions ── -->
+      <div class="wallet-grid">
+
+        <!-- Wallet column -->
+        <div>
+
+          <!-- Wallet card -->
+          <div class="wallet-card">
+            <div class="wallet-inner">
+              <div class="wallet-top">
+                <div>
+                  <p class="wallet-balance-label">Current Balance</p>
+                  <h3 class="wallet-balance" id="walletBalance">Loading...</h3>
+                </div>
+                <button class="wallet-nfc-btn" title="NFC Pay">
+                  <span class="material-symbols-outlined">contactless</span>
+                </button>
+              </div>
+              <div class="wallet-bottom">
+                <div>
+                  <p class="wallet-card-type">VISA PLATINUM</p>
+                  <p class="wallet-card-num">**** **** **** 8291</p>
+                </div>
+                <img
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTcwe3xkiGAfujFi-DS926d9sARe5_n9xsToA-aIFvL_D7as8K401T1bRZyXqEzWTaWCdr2-jPTQrpl7azvLggV0ywXQ3xm1R_YW-JQWZ4P9dlqiQfJkEqXOMoOcNsShXEAPMj3d-Ffiu-L8nvkQl7LaX8XrMq5sIItlT7NNEFkvtbnyjESd9hNtSlq7pWIODzswUCBIPO78R3aJ0QFB7IFxaXbN5UCtUYYWiW7UuAPdVlZfkaW6zGWm6ro44ONHW-V-Quwp6971x6"
+                  alt="Card Logo"
+                  class="wallet-card-logo"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="wallet-actions">
+            <button class="btn-add-funds" id="addFundsBtn">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">add_circle</span>
+              Add Funds
+            </button>
+            <button class="btn-withdraw" id="withdrawBtn">
+              <span class="material-symbols-outlined" style="font-size:0.875rem;">ios_share</span>
+              Withdraw
+            </button>
+          </div>
+
+          <!-- Security badge -->
+          <div class="security-badge">
+            <div class="security-badge-icon">
+              <span class="material-symbols-outlined filled">shield</span>
+            </div>
+            <div>
+              <p class="security-badge-title">Secure Bidding</p>
+              <p class="security-badge-desc">Your funds are protected by multi-sig cold storage.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Transactions column -->
+        <div>
+          <div class="tx-header">
+            <h3 class="tx-title">Recent Activity</h3>
+            <button class="tx-view-all" id="viewAllHistory">View All History</button>
+          </div>
+          <div class="tx-list" id="txList">
+            <!-- Transactions populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+      <!-- ── Won Auctions ── -->
+      <div style="margin-top:2rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="font-size:1.1rem;font-weight:700;color:#fff;">🏆 Won Auctions</h3>
+        </div>
+        <div id="wonList" style="display:flex;flex-direction:column;gap:.75rem;">
+          <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+        </div>
+      </div>
+
+      <!-- ── My Active Bids ── -->
+      <div style="margin-top:2rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h3 style="font-size:1.1rem;font-weight:700;color:#fff;">⚡ My Active Bids</h3>
+        </div>
+        <div id="myBidsList" style="display:flex;flex-direction:column;gap:.75rem;">
+          <p style="color:var(--on-surface-variant);font-size:.875rem;">Loading…</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ══ Bottom Nav (Mobile) ══ -->
+  <nav class="bottom-nav">
+    <a href="/dashboard">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="/auction">
+      <span class="material-symbols-outlined">sensors</span>
+      <span>Live</span>
+    </a>
+    <a href="/wallet" class="active">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Wallet</span>
+    </a>
+    <a href="/wallet">
+      <span class="material-symbols-outlined">person_outline</span>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/wallet.js" defer></script>
+
+<script>
+/* Logout handler – wallet.js handles all data loading */
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('a[href="/login"]').forEach(link => {
+    if (link.closest('.side-nav-bottom, .bottom-nav')) {
+      link.addEventListener('click', async function (e) {
+        e.preventDefault();
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/login';
+      });
+    }
+  });
+});
+</script>
+<script>
+// Load won auctions
+(async function() {
+  try {
+    const res = await fetch('/api/user/stats', { credentials: 'include' });
+    // won list
+    const db  = await fetch('/api/user/my-bids?limit=20', { credentials: 'include' });
+    if (!db.ok) return;
+    const bdata = await db.json();
+    const wonList = document.getElementById('wonList');
+    const bidsList = document.getElementById('myBidsList');
+    
+    if (wonList) wonList.innerHTML = '';
+    if (bidsList) bidsList.innerHTML = '';
+    
+    let wonCount = 0, activeCount = 0;
+    (bdata.bids || []).forEach(b => {
+      const html = `<div onclick="window.location.href='/auction/${b.auction_id}'" style="background:var(--surface-container);border:1px solid var(--outline-variant);border-radius:.75rem;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:.2s;" onmouseenter="this.style.borderColor='var(--primary)'" onmouseleave="this.style.borderColor='var(--outline-variant)'">
+        <div>
+          <p style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">${b.auction_title}</p>
+          <p style="color:var(--on-surface-variant);font-size:.8rem;">${new Date(b.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</p>
+        </div>
+        <p style="font-weight:700;color:var(--primary);">₹${b.amount_inr.toLocaleString('en-IN')}</p>
+      </div>`;
+      if (bidsList) bidsList.insertAdjacentHTML('beforeend', html);
+    });
+    if (bidsList && !bdata.bids?.length) bidsList.innerHTML = '<p style="color:var(--on-surface-variant);font-size:.875rem;">No bids placed yet.</p>';
+
+    // Won auctions from stats
+    const statsRes = await fetch('/api/user/stats', { credentials:'include' });
+    if (statsRes.ok) {
+      const stats = await statsRes.json();
+      if (wonList) {
+        if (stats.items_won === 0) {
+          wonList.innerHTML = '<p style="color:var(--on-surface-variant);font-size:.875rem;">No auction wins yet. Start bidding! 🏆</p>';
+        } else {
+          // Fetch ended auctions where user is winner
+          const wonRes = await fetch('/api/auctions/?status=ended&limit=10', { credentials:'include' });
+          if (wonRes.ok) {
+            const wonData = await wonRes.json();
+            wonList.innerHTML = '';
+            wonData.auctions.forEach(a => {
+              wonList.insertAdjacentHTML('beforeend', `<div onclick="window.location.href='/auction/${a.id}'" style="background:linear-gradient(135deg,rgba(200,153,255,.08),rgba(0,0,0,0));border:1px solid rgba(200,153,255,.3);border-radius:.75rem;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                <div>
+                  <p style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">🏆 ${a.title}</p>
+                  <p style="color:var(--on-surface-variant);font-size:.8rem;">${a.category}</p>
+                </div>
+                <p style="font-weight:700;color:var(--primary);">₹${(a.current_bid/100).toLocaleString('en-IN')}</p>
+              </div>`);
+            });
+          }
+        }
+      }
+    }
+  } catch(e) { console.error(e); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Performance: preconnect before font CSS request fires -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Combined single request: icons + Manrope + Inter, display=swap avoids FOIT -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  <title>Flexy – Create Auction</title>
+  <link rel="stylesheet" href="/static/css/variables.css" />
+  <link rel="stylesheet" href="/static/css/create.css" />
+</head>
+<body>
+
+  <!-- ══ Side Nav (Desktop) ══ -->
+  <aside class="side-nav">
+    <div class="side-nav-brand">
+      <h2>Flexy Beta</h2>
+      <p>High-Velocity Bidding</p>
+    </div>
+    <nav class="side-nav-links">
+      <a href="/dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span>Dashboard</span>
+      </a>
+      <a href="/auction">
+        <span class="material-symbols-outlined">bolt</span>
+        <span>Live Auctions</span>
+      </a>
+      <a href="/create" class="active">
+        <span class="material-symbols-outlined filled">add_circle</span>
+        <span>Create Auction</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        <span>Wallet</span>
+      </a>
+      <a href="/wallet">
+        <span class="material-symbols-outlined">person</span>
+        <span>Profile</span>
+      </a>
+    </nav>
+    <div class="side-nav-cta" style="margin-top:auto;">
+      <button onclick="window.location.href='/dashboard'">Start Bidding</button>
+      <div style="border-top:1px solid rgba(72,72,71,0.2);margin-top:1.5rem;padding-top:1rem;">
+        <nav class="side-nav-links" style="gap:0;">
+          <a href="#"><span class="material-symbols-outlined">settings</span><span>Settings</span></a>
+          <a href="/login"><span class="material-symbols-outlined">logout</span><span>Logout</span></a>
+        </nav>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ Top Nav ══ -->
+  <header class="top-nav" style="padding-left:0;">
+    <div class="top-nav-inner" style="padding-left:calc(16rem + 2rem);">
+      <div style="display:flex;align-items:center;">
+        <!-- Mobile brand -->
+        <a href="/login" class="brand-logo" style="display:none;" id="mobileBrand">Flexy</a>
+        <div class="top-nav-links">
+          <a href="/dashboard">Explore</a>
+          <a href="/auction">Live</a>
+          <a href="/wallet">Wallets</a>
+        </div>
+      </div>
+      <div class="top-nav-right" style="color:var(--primary);">
+        <button class="nav-icon-btn" style="color:var(--primary);"><span class="material-symbols-outlined">notifications</span></button>
+        <button class="nav-icon-btn" style="color:var(--primary);" onclick="window.location.href='/wallet'"><span class="material-symbols-outlined">account_balance_wallet</span></button>
+        <div class="nav-avatar">
+          <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ29-MyVUBYsiXthf26jKn-zv3tP9G8TLDsnf5XABynJjTmKUqXbIhLEhNymafxFIM7FdcHucHuCtk4o7VQNKYmc9QIuSJPWa_qIOxt9D3psRx-KQwcGcaadBLgodoQOOSVBi2dsAya3wgCPCY7NXm2bQRYdIIgTGSSsw6P_e122bxuUCkS6e9nYC7iB327f55mTsvZgSuqwEDpSD2FRDZ2IUQF0ZO4GEJFmlhEewdXacW14pPoJaAN99ndfrPj3UfJPuOcTWIRml2" alt="User" />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ Main Canvas ══ -->
+  <main class="main-with-sidebar" style="padding-bottom:5rem;">
+    <div style="max-width:56rem;margin:0 auto;">
+
+      <!-- Header -->
+      <div class="create-header">
+        <h2>Create New Auction</h2>
+        <p>Bring your high-value assets to the global stage. Set the pace, define the value, and watch the pulse rise.</p>
+      </div>
+
+      <!-- Progress tracker -->
+      <div class="progress-tracker">
+        <div class="progress-step active">
+          <div class="prog-bar"></div>
+          <span class="prog-label">01. Item Details</span>
+        </div>
+        <div class="progress-step">
+          <div class="prog-bar"></div>
+          <span class="prog-label">02. Media Upload</span>
+        </div>
+        <div class="progress-step">
+          <div class="prog-bar"></div>
+          <span class="prog-label">03. Pricing &amp; Time</span>
+        </div>
+      </div>
+
+      <!-- Bento layout -->
+      <div class="create-bento">
+
+        <!-- Left: Form -->
+        <div>
+
+          <!-- Section 1: Auction Identity -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon purple">
+                <span class="material-symbols-outlined">description</span>
+              </div>
+              <h3>Auction Identity</h3>
+            </div>
+            <div class="form-fields">
+              <div class="field-group">
+                <label class="field-label" for="auctionTitle">Auction Title</label>
+                <input class="field-input" type="text" id="auctionTitle" placeholder="e.g. Rare 1967 Chronograph Concept" />
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label" for="auctionCategory">Category</label>
+                  <select class="field-input field-select" id="auctionCategory">
+                    <option>Luxury Watches</option>
+                    <option>Digital Art (NFT)</option>
+                    <option>Classic Cars</option>
+                    <option>Real Estate</option>
+                    <option>Collectibles</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="auctionCondition">Condition</label>
+                  <select class="field-input field-select" id="auctionCondition">
+                    <option>Mint / New</option>
+                    <option>Excellent</option>
+                    <option>Good</option>
+                    <option>Used / Vintage</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="auctionDesc">
+                  Description
+                  <span id="descCounter" style="float:right;font-weight:400;opacity:0.6;">0 / 500</span>
+                </label>
+                <textarea class="field-input field-textarea" id="auctionDesc" rows="4" maxlength="500"
+                  placeholder="Describe the heritage and unique attributes of this item..."></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label class="field-label" for="startBid">Starting Bid (₹ INR)</label>
+                  <input class="field-input" type="number" id="startBid" placeholder="e.g. 5000" min="0" step="100" />
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="auctionDuration">Duration (days)</label>
+                  <select class="field-input field-select" id="auctionDuration">
+                    <option value="">Select duration</option>
+                    <option value="1">1 day</option>
+                    <option value="3">3 days</option>
+                    <option value="7">7 days</option>
+                    <option value="14">14 days</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Gallery -->
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon cyan">
+                <span class="material-symbols-outlined">photo_camera</span>
+              </div>
+              <h3>Gallery Preview</h3>
+            </div>
+            <div class="gallery-grid">
+              <div class="gallery-upload" id="uploadSlot" title="Upload image">
+                <span class="material-symbols-outlined">add</span>
+                <span>Upload</span>
+                <input type="file" id="galleryFileInput" accept="image/*" style="display:none;" />
+              </div>
+              <div class="gallery-img-slot">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDzGUTiog-4qWnio_PNOy5CWhTmUozLKX7XtwTqcOuYPJwidU2eczqYyukezeOiqT_lcAsnntk7t9RcCqpvCs3Yw25H6XxY_gPnQqrV48aT60KsfdNfCoZKsms5i4uZb8_XHbxv9-QlYHWUMz5kWUvRh5uXn_2HYvmq6qqtF0BhYiWAU-ec8qOFGpFvW_6oa-zTXvzMURSdBd_2cblaD13YoPpIyFbOnOVI_sdPLJtuCCPI2alWwlp5f0uEOEZ1lXfN08b-oTj7TGf" alt="Preview" />
+                <div class="delete-overlay"><span class="material-symbols-outlined" style="font-size:0.875rem;">delete</span></div>
+              </div>
+              <div class="gallery-empty"></div>
+              <div class="gallery-empty"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Preview + Actions -->
+        <div class="right-col">
+
+          <!-- Preview card -->
+          <div class="preview-card">
+            <div class="preview-img-ph">
+              <span class="material-symbols-outlined">image</span>
+              <div class="preview-mode-badge">Preview Mode</div>
+            </div>
+            <div class="preview-body">
+              <div class="preview-skeleton-title" id="previewTitle" style="display:none;font-family:var(--font-headline);font-weight:700;font-size:0.9rem;color:var(--on-surface);margin-bottom:0.75rem;"></div>
+              <div class="preview-skeleton-title" id="previewTitleSkeleton"></div>
+              <div class="preview-skeleton-line"></div>
+              <div class="preview-skeleton-line short"></div>
+              <div class="preview-data-row">
+                <div>
+                  <span class="preview-data-label">Est. Starting Bid</span>
+                  <div class="preview-bid-val" id="previewBid">-- --</div>
+                </div>
+                <div style="text-align:right;">
+                  <span class="preview-data-label">Duration</span>
+                  <div class="preview-dur-val" id="previewDur">-- days</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action panel -->
+          <div class="action-panel">
+            <button class="btn-continue" id="continueBtn">Continue to Media</button>
+            <button class="btn-draft" id="draftBtn">Save as Draft</button>
+            <div class="action-note">
+              <span class="material-symbols-outlined">verified_user</span>
+              <p>Your listing will be reviewed by our curators for authenticity before going live. This typically takes 2–4 hours.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══ Bottom Nav (Mobile) ══ -->
+  <nav class="bottom-nav">
+    <a href="/dashboard">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="/auction">
+      <span class="material-symbols-outlined">sensors</span>
+      <span>Live</span>
+    </a>
+    <a href="/create" class="active">
+      <span class="material-symbols-outlined filled">add_circle</span>
+      <span>Create</span>
+    </a>
+    <a href="/wallet">
+      <span class="material-symbols-outlined">payments</span>
+      <span>Wallet</span>
+    </a>
+    <a href="/wallet">
+      <span class="material-symbols-outlined">person_outline</span>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/create.js" defer></script>
+  <script>
+    // Fix mobile brand visibility
+    if (window.innerWidth < 768) {
+      document.getElementById('mobileBrand').style.display = 'block';
+      document.querySelector('.top-nav-inner').style.paddingLeft = '1rem';
+    }
+  </script>
+
+<script>
+(async function() {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!res.ok) { window.location.href = '/login'; return; }
+  } catch { window.location.href = '/login'; }
+})();
+
+// Logout handler
+document.querySelectorAll('a[href="/login"]').forEach(link => {
+  if (link.closest('.side-nav-bottom, .side-nav-cta')) {
+    link.addEventListener('click', async function(e) {
+      if (link.textContent.includes('Logout')) {
+        e.preventDefault();
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/login';
+      }
+    });
+  }
+});
+
+// Hook create form to API
+const createForm = document.getElementById('createAuctionForm');
+if (createForm) {
+  createForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const fd = new FormData(createForm);
+    const startingPriceInr = parseFloat(fd.get('starting_price') || '0');
+    const payload = {
+      title:          fd.get('title'),
+      description:    fd.get('description'),
+      category:       fd.get('category'),
+      image_url:      fd.get('image_url') || '',
+      starting_price: Math.round(startingPriceInr * 100),
+      duration_hours: parseInt(fd.get('duration_hours') || '24'),
+    };
+    const btn = createForm.querySelector('[type="submit"]');
+    if (btn) { btn.textContent = 'Creating...'; btn.disabled = true; }
+    try {
+      const res = await fetch('/api/auctions/', {
+        method: 'POST', credentials: 'include',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Auction created successfully!');
+        window.location.href = '/auction';
+      } else {
+        alert(data.error || 'Failed to create auction');
+      }
+    } catch { alert('Connection error'); }
+    finally { if (btn) { btn.textContent = 'Launch Auction'; btn.disabled = false; } }
+  });
+}
+</script>
+
+<div id="kycGate" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="background:#141414;border:1px solid #2a2a2a;border-radius:1.5rem;
+              width:100%;max-width:500px;padding:2.5rem;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:1rem;">🪪</div>
+    <h2 style="font-family:var(--font-headline);font-size:1.5rem;font-weight:900;
+               margin:0 0 .5rem;color:#fff;">Seller Verification Required</h2>
+    <p style="color:#888;margin:0 0 2rem;font-size:.9rem;">
+      To list items for auction on Flexy, you need to complete seller KYC.
+      This takes under 2 minutes.
+    </p>
+
+    <div id="kycAlert" style="display:none;padding:.75rem 1rem;border-radius:.5rem;
+      font-size:.85rem;margin-bottom:1.25rem;"></div>
+
+    <div style="text-align:left;display:flex;flex-direction:column;gap:1rem;margin-bottom:1.5rem;">
+      <div>
+        <label style="display:block;font-size:.8rem;color:#888;margin-bottom:.3rem;">Legal Full Name *</label>
+        <input id="kycName" type="text" placeholder="As per PAN card"
+          style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;
+                 border-radius:.75rem;padding:.8rem 1rem;color:#fff;font-size:.9rem;outline:none;"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <label style="display:block;font-size:.8rem;color:#888;margin-bottom:.3rem;">PAN Number *</label>
+          <input id="kycPAN" type="text" placeholder="ABCDE1234F" maxlength="10"
+            style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;
+                   border-radius:.75rem;padding:.8rem 1rem;color:#fff;font-size:.9rem;outline:none;
+                   text-transform:uppercase;"/>
+        </div>
+        <div>
+          <label style="display:block;font-size:.8rem;color:#888;margin-bottom:.3rem;">Aadhaar Last 4 digits *</label>
+          <input id="kycAadhaar" type="text" placeholder="1234" maxlength="4"
+            style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;
+                   border-radius:.75rem;padding:.8rem 1rem;color:#fff;font-size:.9rem;outline:none;"/>
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:.8rem;color:#888;margin-bottom:.3rem;">Bank Account Number (optional)</label>
+        <input id="kycBank" type="text" placeholder="For receiving payments"
+          style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;
+                 border-radius:.75rem;padding:.8rem 1rem;color:#fff;font-size:.9rem;outline:none;"/>
+      </div>
+      <div>
+        <label style="display:block;font-size:.8rem;color:#888;margin-bottom:.3rem;">IFSC Code (optional)</label>
+        <input id="kycIFSC" type="text" placeholder="SBIN0001234"
+          style="width:100%;box-sizing:border-box;background:#0e0e0e;border:1px solid #2a2a2a;
+                 border-radius:.75rem;padding:.8rem 1rem;color:#fff;font-size:.9rem;outline:none;
+                 text-transform:uppercase;"/>
+      </div>
+    </div>
+
+    <button id="kycSubmitBtn"
+      style="width:100%;background:linear-gradient(135deg,var(--primary),#9c3dff);
+             color:#fff;border:none;border-radius:.75rem;padding:1rem;
+             font-family:var(--font-headline);font-size:1rem;font-weight:800;cursor:pointer;">
+      Submit KYC & Continue
+    </button>
+    <p style="color:#444;font-size:.75rem;margin:.75rem 0 0;">
+      🔒 Your data is encrypted and stored securely
+    </p>
+  </div>
+</div>
+
+<script>
+(async function () {
+  // Check KYC status on page load
+  try {
+    const authRes = await fetch('/api/auth/me', { credentials: 'include' });
+    if (!authRes.ok) { window.location.href = '/login'; return; }
+
+    const kycRes  = await fetch('/api/user/kyc', { credentials: 'include' });
+    const kycData = await kycRes.json();
+
+    if (!kycData.is_seller_verified) {
+      document.getElementById('kycGate').style.display = 'flex';
+    }
+  } catch { window.location.href = '/login'; }
+
+  document.getElementById('kycSubmitBtn').addEventListener('click', async function () {
+    const name    = document.getElementById('kycName').value.trim();
+    const pan     = document.getElementById('kycPAN').value.trim().toUpperCase();
+    const aadhaar = document.getElementById('kycAadhaar').value.trim();
+    const bank    = document.getElementById('kycBank').value.trim();
+    const ifsc    = document.getElementById('kycIFSC').value.trim().toUpperCase();
+
+    const btn = this;
+    btn.textContent = 'Submitting…'; btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/user/kyc', {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          legal_name: name, pan, aadhaar_last4: aadhaar,
+          bank_account: bank, bank_ifsc: ifsc,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('kycGate').style.display = 'none';
+      } else {
+        const alert = document.getElementById('kycAlert');
+        alert.textContent = data.error || 'Submission failed';
+        alert.style.display = 'block';
+        alert.style.background = 'rgba(255,110,132,.12)';
+        alert.style.color = '#ff6e84';
+        alert.style.border = '1px solid rgba(255,110,132,.3)';
+      }
+    } catch {
+      document.getElementById('kycAlert').textContent = 'Network error';
+      document.getElementById('kycAlert').style.display = 'block';
+    } finally {
+      btn.textContent = 'Submit KYC & Continue'; btn.disabled = false;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
