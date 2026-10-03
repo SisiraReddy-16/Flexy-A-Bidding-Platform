@@ -2,6 +2,10 @@ pipeline {
 
     agent any
 
+    tools {
+        maven 'Maven 3.9.16'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -15,7 +19,7 @@ pipeline {
 
         stage('Maven Build') {
             steps {
-                echo 'Building Flexy application...'
+                echo 'Building Flexy Spring Boot application...'
 
                 sh '''
                     mvn clean package -DskipTests
@@ -28,6 +32,7 @@ pipeline {
                 echo 'Checking generated JAR...'
 
                 sh '''
+                    echo "Generated files:"
                     ls -lh target/
                 '''
             }
@@ -41,7 +46,14 @@ pipeline {
             ==========================================
               FLEXY BUILD SUCCESSFUL
             ==========================================
-            Maven successfully created the JAR.
+
+            GitHub checkout       : SUCCESS
+            Maven build           : SUCCESS
+            JAR generation        : SUCCESS
+
+            Next stage:
+            Docker image build
+
             ==========================================
             '''
         }
@@ -51,7 +63,10 @@ pipeline {
             ==========================================
               FLEXY BUILD FAILED
             ==========================================
-            Check the Jenkins console output.
+
+            Check the failed stage in the Jenkins
+            console output.
+
             ==========================================
             '''
         }
