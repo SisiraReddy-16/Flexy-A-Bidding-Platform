@@ -7,7 +7,9 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out Flexy project...'
-                checkout scm
+
+                git branch: 'main',
+                    url: 'https://github.com/SisiraReddy-16/Flexy-A-Bidding-Platform.git'
             }
         }
 
@@ -55,4 +57,3 @@ pipeline {
         }
     }
 }
-
