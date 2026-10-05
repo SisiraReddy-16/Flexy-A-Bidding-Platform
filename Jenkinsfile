@@ -30,6 +30,12 @@ pipeline {
                 sh 'docker ps'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t flexy-backend:${BUILD_NUMBER} .'
+                }
+        }
     }
 }
 
