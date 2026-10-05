@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -5,7 +6,8 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/SisiraReddy-16/Flexy-A-Bidding-Platform.git'
+                git branch: 'main',
+                    url: 'https://github.com/SisiraReddy-16/Flexy-A-Bidding-Platform.git'
             }
         }
 
@@ -24,3 +26,4 @@ pipeline {
         }
     }
 }
+```
