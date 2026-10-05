@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -24,18 +25,32 @@ pipeline {
             }
         }
 
-        stage('Docker Test') {
+        stage('Docker Build & Push to ECR') {
             steps {
-                sh 'docker --version'
-                sh 'docker ps'
-            }
-        }
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'aws-ecr',
+                        usernameVariable: 'AWS_ACCESS_KEY_ID',
+                        passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                    )
+                ]) {
+                    sh '''
+                        export AWS_DEFAULT_REGION=ap-south-1
 
-        stage('Docker Build') {
-            steps {
-                sh 'docker build -t flexy-backend:${BUILD_NUMBER} .'
+                        aws ecr get-login-password --region $AWS_DEFAULT_REGION |
+                        docker login --username AWS --password-stdin 994748687548.dkr.ecr.ap-south-1.amazonaws.com
+
+                        docker build -t flexy-backend:${BUILD_NUMBER} .
+
+                        docker tag flexy-backend:${BUILD_NUMBER} \
+                        994748687548.dkr.ecr.ap-south-1.amazonaws.com/flexy-backend:${BUILD_NUMBER}
+
+                        docker push \
+                        994748687548.dkr.ecr.ap-south-1.amazonaws.com/flexy-backend:${BUILD_NUMBER}
+                    '''
                 }
+            }
         }
     }
 }
-
+```
