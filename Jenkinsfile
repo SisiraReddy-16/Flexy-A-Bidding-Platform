@@ -50,6 +50,52 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    set -e
+
+                    ssh \
+                      -i /var/lib/jenkins/.ssh/k8s_deploy_key \
+                      -o StrictHostKeyChecking=accept-new \
+                      ubuntu@10.0.1.186 "bash -s -- '${BUILD_NUMBER}'" <<'REMOTE'
+
+set -euo pipefail
+
+TAG="$1"
+ECR_REGISTRY="994748687548.dkr.ecr.ap-south-1.amazonaws.com"
+IMAGE="$ECR_REGISTRY/flexy-backend:$TAG"
+
+echo "Refreshing ECR pull secret..."
+
+ECR_PASSWORD="$(aws ecr get-login-password --region ap-south-1)"
+
+sudo k3s kubectl create secret docker-registry ecr-secret \
+    --docker-server="$ECR_REGISTRY" \
+    --docker-username=AWS \
+    --docker-password="$ECR_PASSWORD" \
+    --docker-email=unused@example.com \
+    --dry-run=client \
+    -o yaml | sudo k3s kubectl apply -f -
+
+echo "Deploying image: $IMAGE"
+
+sudo k3s kubectl set image deployment/flexy-backend \
+    flexy-backend="$IMAGE"
+
+echo "Waiting for Kubernetes rollout..."
+
+sudo k3s kubectl rollout status deployment/flexy-backend \
+    --timeout=180s
+
+echo "Deployment completed."
+
+sudo k3s kubectl get pods -l app=flexy-backend -o wide
+
+REMOTE
+                '''
+            }
+        }
     }
 }
-
