@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
     stages {
 
         stage('Checkout') {
@@ -12,14 +17,25 @@ pipeline {
 
         stage('Maven Test') {
             steps {
-                sh 'mvn -version'
+                sh '''
+                    set -e
+                    mvn -version
+                    mvn test
+                '''
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar'
+                retry(2) {
+                    timeout(time: 10, unit: 'MINUTES') {
+                        withSonarQubeEnv('SonarQube') {
+                            sh '''
+                                set -e
+                                mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+                            '''
+                        }
+                    }
                 }
             }
         }
@@ -38,13 +54,15 @@ pipeline {
 
                         export AWS_DEFAULT_REGION=ap-south-1
 
-                        aws ecr get-login-password --region $AWS_DEFAULT_REGION |
+                        aws ecr get-login-password \
+                            --region $AWS_DEFAULT_REGION |
                         docker login \
                             --username AWS \
                             --password-stdin \
                             994748687548.dkr.ecr.ap-south-1.amazonaws.com
 
-                        docker build -t flexy-backend:${BUILD_NUMBER} .
+                        docker build \
+                            -t flexy-backend:${BUILD_NUMBER} .
 
                         docker tag \
                             flexy-backend:${BUILD_NUMBER} \
@@ -111,6 +129,8 @@ sudo k3s kubectl rollout status deployment/flexy-backend \
     --timeout=180s
 
 echo "Deployment successful."
+
+sudo k3s kubectl get deployment flexy-backend
 
 sudo k3s kubectl get pods \
     -l app=flexy-backend \
